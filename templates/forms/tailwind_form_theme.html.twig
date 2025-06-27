@@ -1,0 +1,59 @@
+{# templates/forms/tailwind_form_theme.html.twig #}
+{% use 'form_div_layout.html.twig' %}
+{# début du formulaire avec espacement vertical #}
+{% block form_start -%}
+  {% set attr = attr|merge({'class': (attr.class|default('space-y-6'))}) %}
+  {{- parent() -}}
+{%- endblock %}
+
+{# chaque ligne de champ enveloppée dans un div #}
+{% block form_row -%}
+  <div class="mb-4">
+    {{- form_label(form) -}}
+    {{- form_widget(form) -}}
+    {{- form_errors(form) -}}
+  </div>
+{%- endblock %}
+
+{# labels stylés #}
+{% block form_label -%}
+  {% if label is not same as(false) %}
+    {% set label_attr = label_attr|merge({'class': (label_attr.class|default('block text-sm font-medium text-gray-700 mb-1'))}) %}
+  {% endif %}
+  {{- parent() -}}
+{%- endblock %}
+
+{# widgets (inputs, selects, textarea) stylés #}
+{% block form_widget_simple -%}
+  {% set attr = attr|merge({'class': (attr.class|default('block w-full border border-gray-300 rounded p-2 focus:ring focus:ring-opacity-50'))}) %}
+  {{- parent() -}}
+{%- endblock %}
+
+{# textarea #}
+{% block textarea_widget -%}
+  {% set attr = attr|merge({'class': (attr.class|default('block w-full border border-gray-300 rounded p-2 focus:ring focus:ring-opacity-50')), 'rows': attr.rows|default(3)}) %}
+  {{- parent() -}}
+{%- endblock %}
+
+{# choice (select) #}
+{% block choice_widget_expanded -%}
+  <div {{ block('widget_container_attributes') }} class="space-y-2">
+    {{- parent() -}}
+  </div>
+{%- endblock %}
+
+{% block choice_widget_collapsed -%}
+  {% set attr = attr|merge({'class': (attr.class|default('block w-full border-gray-300 rounded p-2 focus:ring focus:ring-opacity-50'))}) %}
+  {{- parent() -}}
+{%- endblock %}
+
+{# affichage des erreurs #}
+{% block form_errors -%}
+  {% if errors|length > 0 %}
+    <ul class="mt-1 text-sm text-red-600 space-y-1">
+      {% for error in errors %}
+        <li>{{ error.message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{%- endblock %}

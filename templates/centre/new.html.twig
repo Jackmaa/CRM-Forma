@@ -1,0 +1,19 @@
+{# templates/centre/new.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un centre{% endblock %}
+
+{% block body %}
+<section class="p-6 bg-gray-50 min-h-screen">
+  <div class="bg-white p-6 rounded-2xl shadow-lg max-w-2xl mx-auto">
+    {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+      {{ form_widget(form) }}
+      <div class="flex justify-end">
+        <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-xl hover:bg-blue-600 transition">
+          Enregistrer
+        </button>
+      </div>
+    {{ form_end(form) }}
+  </div>
+</section>
+{% endblock %}

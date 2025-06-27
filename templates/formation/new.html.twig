@@ -1,0 +1,106 @@
+{# templates/formation/new.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer une formation{% endblock %}
+
+{% block body %}
+  <div class="max-w-3xl mx-auto p-6 bg-white shadow rounded">
+
+    <h1 class="text-2xl font-semibold mb-4">Nouvelle formation</h1>
+
+    {{ form_start(form,{
+    'action': path('formation_new'),
+    'method': 'POST'}) }}
+
+      {{ form_row(form.titre) }}
+      {{ form_row(form.slug) }}
+      {{ form_row(form.thematique) }}
+      {{ form_row(form.niveau) }}
+
+      {# ---------- MODALITÉS ---------- #}
+      <h2 class="mt-6 font-medium">Modalités pédagogiques</h2>
+      <div id="modalites-collection"
+           data-prototype="{{ form_widget(form.modalites.vars.prototype)|e('html_attr') }}">
+        {# champs préexistants (utile en édition) #}
+        {% for child in form.modalites %}
+          <div class="collection-item mb-2 flex items-center">
+            {{ form_widget(child, {'attr': {'class': 'flex-1'}}) }}
+            <button type="button" class="remove-item ml-2 text-red-500">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="add-modalite"
+              class="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded">
+        + Ajouter une modalité
+      </button>
+
+      {# ---------- OBJECTIFS ---------- #}
+      <h2 class="mt-6 font-medium">Objectifs pédagogiques</h2>
+      <div id="objectifs-collection"
+           data-prototype="{{ form_widget(form.objectifs.vars.prototype)|e('html_attr') }}">
+        {% for child in form.objectifs %}
+          <div class="collection-item mb-2 flex items-center">
+            {{ form_widget(child, {'attr': {'class': 'flex-1'}}) }}
+            <button type="button" class="remove-item ml-2 text-red-500">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="add-objectif"
+              class="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded">
+        + Ajouter un objectif
+      </button>
+
+      {{ form_row(form.prerequis) }}
+      {{ form_row(form.duree) }}
+      {{ form_row(form.tarif) }}
+      {{ form_row(form.description) }}
+      {{ form_row(form.published) }}
+
+      <div class="mt-6">
+        <button type="submit" class="ml-2 px-4 py-2 bg-gray-300 text-gray-800 rounded">
+          Enregistrer
+        </button>
+      </div>
+
+{{ form_end(form) }}
+
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Générique : ajoute un nouvel item dans la collection
+      function addItem(collectionId) {
+        const container = document.getElementById(collectionId);
+        const prototype = container.getAttribute('data-prototype');
+        const index = container.querySelectorAll('.collection-item').length;
+        // remplace __name__ par l'index
+        const newForm = prototype.replace(/__name__/g, index);
+
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('collection-item', 'mb-2', 'flex', 'items-center');
+        wrapper.innerHTML = newForm +
+          '<button type="button" class="remove-item ml-2 text-red-500">✕</button>';
+
+        container.appendChild(wrapper);
+      }
+
+      // Ajout Modalité
+      document.getElementById('add-modalite')
+        .addEventListener('click', () => addItem('modalites-collection'));
+
+      // Ajout Objectif
+      document.getElementById('add-objectif')
+        .addEventListener('click', () => addItem('objectifs-collection'));
+
+      // Suppression (délégation d'événement)
+      document.body.addEventListener('click', e => {
+        if (e.target.matches('.remove-item')) {
+          e.target.closest('.collection-item').remove();
+        }
+      });
+    });
+  </script>
+{% endblock %}

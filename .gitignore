@@ -1,8 +1,11 @@
-
+.gitignore
 ###> symfony/framework-bundle ###
-/.env.local
-/.env.local.php
-/.env.*.local
+.env.local
+.env.test.local
+.env.test
+.env.dev
+.env.local.php
+.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
@@ -18,3 +21,4 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+/node_modules/

@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="flex">
+  <sidebar></sidebar>
+  <main class="flex-1 p-6 space-y-6">
+    <h1 class="text-2xl font-bold">Tableau de bord</h1>
+    <div class="grid grid-cols-4 gap-4">
+      <statscard label="Formations en cours" value="8"></statscard>
+      <statscard label="Devis en attente" value="5"></statscard>
+      <statscard label="Factures en retard" value="2"></statscard>
+      <statscard label="Taux de remplissage" value="87%"></statscard>
+    </div>
+    <planningcard></planningcard>
+    <recentactivity :items="[
+      {id:1,title:'Nouveau devis créé',subtitle:'TechCorp'},
+      {id:2,title:'Formation Excel terminée',subtitle:'Il y a 4h'},
+      /* … */
+    ]"></recentactivity>
+    <quickactions></quickactions>
+  </main>
+</div>
+    <script type="module" src="http://localhost:5173/@vite/client"></script>
+    <script type="module" src="http://localhost:5173/assets/dashboard.js"></script>
+{% endblock %}

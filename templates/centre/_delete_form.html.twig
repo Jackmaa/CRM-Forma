@@ -1,0 +1,5 @@
+{# templates/centre/_delete_form.html.twig #}
+<form method="post" action="{{ path('centre_delete', {'id': centre.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce centre ?');">
+  <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ centre.id) }}">
+  <button class="btn btn-sm btn-danger">Supprimer</button>
+</form>
