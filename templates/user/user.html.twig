@@ -2,9 +2,8 @@
 
 {% block body %}
 <div class="flex">
-  <sidebar></sidebar>
     <main class="flex-1 space-y-6">
-        <Userpage>
+      <div {{ vue_component('User/User') }}></div>
     </main>
 </div>
 <script type="module" src="http://localhost:5173/@vite/client"></script>

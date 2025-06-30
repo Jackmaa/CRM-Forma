@@ -2,8 +2,7 @@
 
 {% block body %}
 <div class="flex">
-  <sidebar></sidebar>
-  <settings></settings>
+    <div {{ vue_component('Settings/Settings') }}></div>
 </div>
 <script type="module" src="http://localhost:5173/@vite/client"></script>
 <script type="module" src="http://localhost:5173/assets/settings.js"></script>

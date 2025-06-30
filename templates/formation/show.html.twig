@@ -1,0 +1,33 @@
+{# templates/formation/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail de la formation{% endblock %}
+
+{% block body %}
+<div {{
+  vue_component('Formations/FormationShow', {
+    formation: {
+      id: formation.id,
+      titre: formation.titre,
+      slug: formation.slug,
+      thematique: formation.thematique,
+      niveau: formation.niveau,
+      duree: formation.duree,
+      tarif: formation.tarif,
+      prerequis: formation.prerequis,
+      description: formation.description,
+      published: formation.published,
+      modalites: formation.modalites,
+      objectifs: formation.objectifs,
+      createdAt: formation.createdAt ? formation.createdAt|date('c') : null,
+      responsable: formation.responsable ? formation.responsable.fullName : null
+    },
+    saveUrl: path('formation_edit', { id: formation.id }),
+    deleteUrl: path('formation_delete', { id: formation.id }),
+    csrfToken: csrf_token('delete' ~ formation.id),
+    isAdmin: is_granted('ROLE_ADMIN_CENTRE')
+  })
+}}></div>
+
+
+{% endblock %}

@@ -1,7 +1,7 @@
 <template>
     <aside
         :class="[
-            'bg-white shadow flex flex-col justify-between transition-all duration-300 ease-in-out h-screen px-2',
+            'bg-red shadow flex flex-col justify-between transition-all duration-300 ease-in-out h-screen px-2',
             isCollapsed ? 'w-16' : 'w-64',
         ]"
     >

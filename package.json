@@ -1,31 +1,46 @@
 {
-  "name": "crm-formateurs",
-  "version": "1.0.0",
-  "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@midudev/tailwind-animations": "^0.2.0",
-    "chart.js": "^4.5.0",
-    "lucide-vue-next": "^0.516.0",
-    "papaparse": "^5.5.3",
-    "vue-chartjs": "^5.3.2"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.10",
-    "@vitejs/plugin-vue": "^5.2.4",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.10",
-    "vite": "^6.3.5",
-    "vue": "^3.5.16"
-  },
-  "description": ""
+    "name": "crm-formateurs",
+    "version": "1.0.0",
+    "main": "index.js",
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production",
+        "dev-server": "encore dev-server"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@hotwired/stimulus": "^3.2.2",
+        "@midudev/tailwind-animations": "^0.2.0",
+        "@symfony/stimulus-bridge": "^4.0.1",
+        "@symfony/ux-vue": "^2.27.0",
+        "chart.js": "^4.5.0",
+        "lucide-vue-next": "^0.516.0",
+        "papaparse": "^5.5.3",
+        "vue-chartjs": "^5.3.2"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.27.7",
+        "@babel/preset-env": "^7.27.2",
+        "@hotwired/turbo": "^8.0.13",
+        "@symfony/ux-turbo": "^2.27.0",
+        "@symfony/webpack-encore": "^5.1.0",
+        "@tailwindcss/postcss": "^4.1.11",
+        "autoprefixer": "^10.4.21",
+        "core-js": "^3.43.0",
+        "postcss": "^8.5.6",
+        "postcss-loader": "^8.1.0",
+        "tailwindcss": "^4.1.11",
+        "vue": "^3.5.16",
+        "vue-loader": "^17.0.0",
+        "webpack": "^5.99.9",
+        "webpack-cli": "^6.0.1",
+        "webpack-notifier": "^1.15.0"
+    },
+    "description": ""
 }

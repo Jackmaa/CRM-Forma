@@ -7,9 +7,19 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class HomeController extends AbstractController {
-    #[Route('/', name: 'home')]
+    #[Route('/', name: 'home', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    /**
+     * Affiche la page d'accueil et gère la sélection du centre.
+     *
+     * @param CentreRepository $centreRepo Le repository des centres.
+     * @param Request $request La requête HTTP.
+     * @param SessionInterface $session La session utilisateur.
+     * @return Response La réponse HTTP avec le rendu de la vue appropriée.
+     */
     public function index(
         CentreRepository $centreRepo,
         Request $request,

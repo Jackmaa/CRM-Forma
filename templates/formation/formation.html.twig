@@ -2,13 +2,11 @@
 
 {% block body %}
 <div class="flex">
-  <sidebar></sidebar>
     <main class="flex-1 space-y-6">
-        <Formation>
+      <div {{ vue_component('Formations/FormationList') }}></div>
     </main>
 </div>
-<script type="module" src="http://localhost:5173/@vite/client"></script>
-<script type="module" src="http://localhost:5173/assets/formation.js"></script>
+
 <script>
   window.APP_ROUTES = {
     formationNew: "{{ path('formation_new') }}"
