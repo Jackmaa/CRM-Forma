@@ -54,9 +54,6 @@ class Formation {
     private ?string $description = null;
 
     #[ORM\Column]
-    private bool $published = false;
-
-    #[ORM\Column]
     private  ? \DateTimeImmutable $created_at = null;
 
     #[ORM\ManyToOne(inversedBy : 'formations')]
@@ -178,16 +175,6 @@ class Formation {
     public function setDescription(string $description): static
     {
         $this->description = $description;
-        return $this;
-    }
-
-    public function isPublished(): bool {
-        return $this->published;
-    }
-
-    public function setPublished(bool $published): static
-    {
-        $this->published = $published;
         return $this;
     }
 

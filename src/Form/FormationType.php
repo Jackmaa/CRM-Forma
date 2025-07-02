@@ -5,8 +5,6 @@ namespace App\Form;
 
 use App\Entity\Formation;
 use Symfony\Component\Form\AbstractType;
-
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
@@ -57,10 +55,6 @@ class FormationType extends AbstractType {
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description détaillée',
-            ])
-            ->add('published', CheckboxType::class, [
-                'label'    => 'Publiée',
-                'required' => false,
             ])
         ;
     }

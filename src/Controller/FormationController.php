@@ -175,10 +175,6 @@ class FormationController extends AbstractController {
             $formation->setDescription($data['description']);
         }
 
-        if (array_key_exists('published', $data)) {
-            $formation->setPublished((bool) $data['published']);
-        }
-
         if (array_key_exists('modalites', $data)) {
             $formation->setModalites($data['modalites']);
         }
@@ -200,7 +196,8 @@ class FormationController extends AbstractController {
                 'tarif'       => $formation->getTarif(),
                 'prerequis'   => $formation->getPrerequis(),
                 'description' => $formation->getDescription(),
-                'published'   => $formation->isPublished()]]);
+            ],
+        ], );
     }
 
     #[Route('/{id}/delete', name: 'formation_delete', methods: ['POST'])]

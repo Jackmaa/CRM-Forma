@@ -42,18 +42,6 @@ class FormationRepository extends ServiceEntityRepository {
     }
 
     /**
-     * Trouve les formations publiées
-     */
-    public function findPublished(): array {
-        return $this->createQueryBuilder('f')
-            ->andWhere('f.published = :published')
-            ->setParameter('published', true)
-            ->orderBy('f.titre', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
      * Trouve les formations par centre
      */
     public function findByCentre(int $centreId): array {
@@ -71,9 +59,7 @@ class FormationRepository extends ServiceEntityRepository {
     public function findByThematique(string $thematique): array {
         return $this->createQueryBuilder('f')
             ->andWhere('f.thematique = :thematique')
-            ->andWhere('f.published = :published')
             ->setParameter('thematique', $thematique)
-            ->setParameter('published', true)
             ->orderBy('f.titre', 'ASC')
             ->getQuery()
             ->getResult();
@@ -85,9 +71,7 @@ class FormationRepository extends ServiceEntityRepository {
     public function findByNiveau(string $niveau): array {
         return $this->createQueryBuilder('f')
             ->andWhere('f.niveau = :niveau')
-            ->andWhere('f.published = :published')
             ->setParameter('niveau', $niveau)
-            ->setParameter('published', true)
             ->orderBy('f.titre', 'ASC')
             ->getQuery()
             ->getResult();
@@ -99,9 +83,7 @@ class FormationRepository extends ServiceEntityRepository {
     public function search(string $term): array {
         return $this->createQueryBuilder('f')
             ->andWhere('f.titre LIKE :term OR f.description LIKE :term OR f.thematique LIKE :term')
-            ->andWhere('f.published = :published')
             ->setParameter('term', '%' . $term . '%')
-            ->setParameter('published', true)
             ->orderBy('f.titre', 'ASC')
             ->getQuery()
             ->getResult();
@@ -139,8 +121,6 @@ class FormationRepository extends ServiceEntityRepository {
         return $this->createQueryBuilder('f')
             ->select('f', 'COUNT(s.id) as sessionCount')
             ->leftJoin('f.sessions', 's')
-            ->andWhere('f.published = :published')
-            ->setParameter('published', true)
             ->groupBy('f.id')
             ->orderBy('sessionCount', 'DESC')
             ->addOrderBy('f.titre', 'ASC')
