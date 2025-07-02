@@ -1,9 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div class="flex">
+<div class="flex flex-col items-center justify-center h-screen">
     <div {{ vue_component('Settings/Settings') }}></div>
 </div>
-<script type="module" src="http://localhost:5173/@vite/client"></script>
-<script type="module" src="http://localhost:5173/assets/settings.js"></script>
 {% endblock %}

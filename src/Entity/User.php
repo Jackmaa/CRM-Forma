@@ -43,6 +43,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     #[ORM\Column]
     private  ? \DateTimeImmutable $created_at = null;
 
+    #[ORM\Column(type : 'boolean')]
+    private bool $isActive = true;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $forcePasswordReset = true;
+
     public function __construct() {
         $this->created_at = new \DateTimeImmutable();
     }
@@ -169,5 +175,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
 
     public function isAssistant(): bool {
         return $this->role === UserRole::ASSISTANT;
+    }
+
+    public function isActive(): bool {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): self {
+        $this->isActive = $isActive;
+        return $this;
+    }
+
+    public function getForcePasswordReset(): bool {
+        return $this->forcePasswordReset;
+    }
+
+    public function setForcePasswordReset(bool $forcePasswordReset): self {
+        $this->forcePasswordReset = $forcePasswordReset;
+        return $this;
     }
 }

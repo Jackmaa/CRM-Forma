@@ -1,4 +1,9 @@
 const Encore = require("@symfony/webpack-encore");
+const path = require("path");
+
+Encore.addAliases({
+    "@": path.resolve(__dirname, "assets/vue"),
+});
 
 Encore.setOutputPath("public/build/")
     .setPublicPath("/build")

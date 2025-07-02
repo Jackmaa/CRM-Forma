@@ -3,9 +3,8 @@
 {% block body %}
 <div class="flex">
     <main class="flex-1 space-y-6">
-      <div {{ vue_component('User/User') }}></div>
+      <div {{ vue_component('User/UserList') }}></div>
     </main>
 </div>
-<script type="module" src="http://localhost:5173/@vite/client"></script>
-<script type="module" src="http://localhost:5173/assets/user.js"></script>
+
 {% endblock %}

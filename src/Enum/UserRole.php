@@ -9,7 +9,7 @@ case ASSISTANT    = 'ASSISTANT';
 
     public function getLabel(): string {
         return match ($this) {
-            self::ADMIN_CENTRE => 'Administrateur Centre',
+            self::ADMIN_CENTRE => 'Admin',
             self::FORMATEUR => 'Formateur',
             self::STAGIAIRE => 'Stagiaire',
             self::ASSISTANT => 'Assistant',

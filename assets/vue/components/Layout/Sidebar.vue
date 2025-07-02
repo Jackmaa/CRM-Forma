@@ -1,7 +1,7 @@
 <template>
     <aside
         :class="[
-            'bg-red shadow flex flex-col justify-between transition-all duration-300 ease-in-out h-screen px-2',
+            'shadow flex flex-col justify-between transition-all duration-300 ease-in-out h-screen px-2',
             isCollapsed ? 'w-16' : 'w-64',
         ]"
     >
@@ -51,12 +51,22 @@
                     :collapsed="isCollapsed"
                     to="/stats"
                 />
+
+                <!-- Lien Paramètres avec badge et coloration conditionnelle -->
                 <SidebarLink
                     icon="Settings"
                     label="Paramètres"
                     :collapsed="isCollapsed"
                     to="/settings"
-                />
+                    :class="paramLinkClass"
+                >
+                    <template #append>
+                        <span
+                            v-if="forcePasswordReset"
+                            class="absolute top-2 right-4 w-2 h-2 bg-red-600 rounded-full"
+                        ></span>
+                    </template>
+                </SidebarLink>
             </nav>
         </div>
 
@@ -73,9 +83,20 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import SidebarLink from "./SidebarLink.vue";
+import { useUserSettings } from "@/composables/useUserSettings.js";
 
 const isCollapsed = ref(false);
+
+// On récupère forcePasswordReset depuis notre composable
+const { forcePasswordReset } = useUserSettings();
+
+// Classe conditionnelle pour le lien Paramètres
+const paramLinkClass = computed(() =>
+    forcePasswordReset.value
+        ? "text-red-600 hover:bg-red-50 hover:text-red-700 relative"
+        : ""
+);
 </script>
