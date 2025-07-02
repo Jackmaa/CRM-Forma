@@ -63,8 +63,10 @@
                     <template #append>
                         <span
                             v-if="forcePasswordReset"
-                            class="absolute top-2 right-4 w-2 h-2 bg-red-600 rounded-full"
-                        ></span>
+                            class="absolute top-3 right-3 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-semibold text-white bg-red-600 rounded-full"
+                        >
+                            1
+                        </span>
                     </template>
                 </SidebarLink>
             </nav>
@@ -83,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import SidebarLink from "./SidebarLink.vue";
 import { useUserSettings } from "@/composables/useUserSettings.js";
@@ -97,6 +99,6 @@ const { forcePasswordReset } = useUserSettings();
 const paramLinkClass = computed(() =>
     forcePasswordReset.value
         ? "text-red-600 hover:bg-red-50 hover:text-red-700 relative"
-        : ""
+        : "text-gray-600 hover:bg-gray-100"
 );
 </script>

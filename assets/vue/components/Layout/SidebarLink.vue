@@ -13,6 +13,7 @@
         <span v-if="!collapsed" class="transition-opacity duration-300">
             {{ label }}
         </span>
+        <slot name="append" />
     </a>
 </template>
 

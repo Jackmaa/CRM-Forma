@@ -1,16 +1,11 @@
 import { ref, onMounted } from "vue";
 
 export function useUserSettings() {
-    const forcePasswordReset = ref(false);
+    let forcePasswordReset = ref(false);
 
     onMounted(async () => {
-        const token = localStorage.getItem("auth_token");
-        if (!token) return;
-
         try {
-            const res = await fetch("/api/user/settings", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const res = await fetch("/api/user/settings");
             if (!res.ok) throw new Error("Failed to fetch settings");
             const data = await res.json();
             forcePasswordReset.value = data.forcePasswordReset;
