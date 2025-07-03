@@ -32,6 +32,7 @@ final class UserController extends AbstractController {
                 'prenom'   => $user->getPrenom(),
                 'email'    => $user->getEmail(),
                 'initials' => $user->getInitials(),
+                'role'     => $user->getRole()->value,
             ];
         }, $users);
 
@@ -124,5 +125,131 @@ final class UserController extends AbstractController {
 
         $em->flush();
         return $this->json(['success' => true]);
+    }
+
+    #[Route('/api/user/{id}', name: 'user_api_detail', methods: ['GET'])]
+    public function apiDetail(User $user): JsonResponse {
+        if ($user->getCentre() !== $this->getUser()->getCentre()) {
+            throw $this->createAccessDeniedException();
+        }
+        return $this->json([
+            'id'       => $user->getId(),
+            'prenom'   => $user->getPrenom(),
+            'nom'      => $user->getNom(),
+            'email'    => $user->getEmail(),
+            'role'     => $user->getRole()->value,
+            'isActive' => (bool) $user->isActive(),
+        ]);
+    }
+
+    #[Route('/api/user/{id}', name: 'api_user_update', methods: ['PATCH'])]
+    public function apiUpdate(
+        User $user,
+        Request $request,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $hasher
+    ): JsonResponse {
+        // Sécurité : même centre
+        if ($user->getCentre() !== $this->getUser()->getCentre()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        // Champs modifiables
+        if (isset($data['prenom'])) {
+            $user->setPrenom($data['prenom']);
+        }
+        if (isset($data['nom'])) {
+            $user->setNom($data['nom']);
+        }
+        if (isset($data['email'])) {
+            $user->setEmail($data['email']);
+        }
+        if (isset($data['role'])) {
+            $user->setRole(\App\Enum\UserRole::from($data['role']));
+        }
+        if (isset($data['isActive'])) {
+            $user->setIsActive((bool) $data['isActive']);
+        }
+        // mot de passe si envoyé
+        if (! empty($data['password'])) {
+            $user->setPassword($hasher->hashPassword($user, $data['password']));
+            $user->setForcePasswordReset(false);
+        }
+
+        $em->flush();
+        return $this->json([
+            'success' => true,
+            // renvoie éventuellement la nouvelle version de la ressource
+            'user'    => [
+                'prenom'   => $user->getPrenom(),
+                'nom'      => $user->getNom(),
+                'email'    => $user->getEmail(),
+                'role'     => $user->getRole()->value,
+                'isActive' => $user->isActive(),
+            ],
+        ]);
+    }
+
+    #[Route('/user/{id}', name: 'user_show', methods: ['GET'])]
+    public function show(User $user): Response {
+        if ($user->getCentre() !== $this->getUser()->getCentre()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        return $this->render('user/show.html.twig', [
+            'user' => $user,
+        ]);
+    }
+
+    #[Route('/user/{id}/edit', name: 'user_edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Request $request,
+        User $user,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $hasher
+    ): Response {
+        if ($user->getCentre() !== $this->getUser()->getCentre()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $form = $this->createForm(UserType::class, $user);
+        // Optionnel : champ mot-de-passe non mappé pour changer l'existant
+        $form->add('plainPassword', PasswordType::class, [
+            'mapped'   => false,
+            'required' => false,
+            'label'    => 'Nouveau mot de passe',
+        ]);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $new = $form->get('plainPassword')->getData();
+            if ($new) {
+                $user->setPassword($hasher->hashPassword($user, $new));
+                $user->setForcePasswordReset(false);
+            }
+            $em->flush();
+            $this->addFlash('success', 'Utilisateur mis à jour.');
+            return $this->redirectToRoute('user_show', ['id' => $user->getId()]);
+        }
+
+        return $this->render('user/edit.html.twig', [
+            'form' => $form->createView(),
+            'user' => $user,
+        ]);
+    }
+
+    #[Route('/user/{id}/delete', name: 'user_delete', methods: ['POST'])]
+    public function delete(Request $req, User $user, EntityManagerInterface $em): Response {
+        if ($user->getCentre() !== $this->getUser()->getCentre()) {
+            throw $this->createAccessDeniedException();
+        }
+        if ($this->isCsrfTokenValid('delete_user_' . $user->getId(), $req->request->get('_token'))) {
+            $em->remove($user);
+            $em->flush();
+            $this->addFlash('success', 'Utilisateur supprimé.');
+        }
+        return $this->redirectToRoute('user_index');
     }
 }
