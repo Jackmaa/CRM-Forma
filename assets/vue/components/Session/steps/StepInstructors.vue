@@ -54,7 +54,7 @@ onMounted(async () => {
     }
 });
 
-// Emit update whenever selection changes
+// Émmettre les modifications vers le parent
 watch(
     () => local.formateurIds,
     (val) => {
