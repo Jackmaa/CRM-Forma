@@ -218,4 +218,16 @@ class FormationController extends AbstractController {
 
         return $this->redirectToRoute('formation_index');
     }
+    #[Route('/api/{id}', name: 'formation_api_detail', methods: ['GET'])]
+    public function apiDetail(Formation $formation): JsonResponse {
+        if ($formation->getCentre() !== $this->getUser()->getCentre()) {
+            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à voir cette formation.');
+        }
+
+        return $this->json([
+            'id'          => $formation->getId(),
+            'title'       => $formation->getTitre(),
+            'description' => $formation->getDescription(),
+        ]);
+    }
 }

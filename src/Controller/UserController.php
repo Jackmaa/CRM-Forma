@@ -21,20 +21,29 @@ final class UserController extends AbstractController {
     }
 
     #[Route('/api/users', name: 'api_users_list', methods: ['GET'])]
-    public function getAllUsers(UserRepository $userRepository): JsonResponse {
-        $users = $userRepository->findAll();
+    public function getAllUsers(Request $request, UserRepository $userRepository): JsonResponse {
+        $role   = $request->query->get('role');
+        $centre = $this->getUser()->getCentre();
 
-        $formatted = array_map(function ($user) {
-            return [
-                'id'       => $user->getId(),
-                'fullname' => $user->getFullName(),
-                'nom'      => $user->getNom(),
-                'prenom'   => $user->getPrenom(),
-                'email'    => $user->getEmail(),
-                'initials' => $user->getInitials(),
-                'role'     => $user->getRole()->value,
-            ];
-        }, $users);
+        // Si on a un filtre role, on l’applique, sinon on prend tout
+        if ($role) {
+            $users = $userRepository->findBy([
+                'role'   => $role,
+                'centre' => $centre,
+            ]);
+        } else {
+            $users = $userRepository->findBy(['centre' => $centre]);
+        }
+
+        $formatted = array_map(fn($user) => [
+            'id'       => $user->getId(),
+            'fullname' => $user->getFullName(),
+            'nom'      => $user->getNom(),
+            'prenom'   => $user->getPrenom(),
+            'email'    => $user->getEmail(),
+            'role'     => $user->getRole()->value,
+            'initials' => $user->getInitials(),
+        ], $users);
 
         return $this->json($formatted);
     }
