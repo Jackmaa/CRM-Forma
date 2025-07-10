@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <div class="p-6 bg-gray-50 min-h-screen">
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h1 class="text-2xl font-semibold mb-4">Détails de la session #{{ session.id }}</h1>
+
+      <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <dt class="font-medium">Formation</dt>
+          <dd>{{ session.formation.titre }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium">Formateur responsable</dt>
+          <dd>{{ session.formateurResponsable.prenom }} {{ session.formateurResponsable.nom }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium">Date de début</dt>
+          <dd>{{ session.dateDebut|date('d/m/Y H:i') }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium">Date de fin</dt>
+          <dd>{{ session.dateFin|date('d/m/Y H:i') }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium">Lieu</dt>
+          <dd>{{ session.lieu }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium">Modalité</dt>
+          <dd>{{ session.modalite }}</dd>
+        </div>
+        {% if session.remarques %}
+          <div class="md:col-span-2">
+            <dt class="font-medium">Remarques</dt>
+            <dd>{{ session.remarques }}</dd>
+          </div>
+        {% endif %}
+        <div>
+          <dt class="font-medium">Actif</dt>
+          <dd>{{ session.isIsActive() ? 'Oui' : 'Non' }}</dd>
+        </div>
+      </dl>
+
+      <div class="mt-6 flex space-x-3">
+        <a
+          href="{{ path('session_edit', {'id': session.id}) }}"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
+          Modifier
+        </a>
+
+        <form
+          method="post"
+          action="{{ path('session_delete', {'id': session.id}) }}"
+          onsubmit="return confirm('Supprimer cette session ?');"
+        >
+          <input
+            type="hidden"
+            name="_token"
+            value="{{ csrf_token('delete_session_' ~ session.id) }}"
+          />
+          <button
+            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+            type="submit"
+          >
+            Supprimer
+          </button>
+        </form>
+
+        <a
+          href="{{ path('session_index') }}"
+          class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition"
+        >
+          Retour à la liste
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

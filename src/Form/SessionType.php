@@ -30,6 +30,19 @@ class SessionType extends AbstractType {
                     ->setParameter('r', 'FORMATEUR'),
                 'label'         => 'Formateur responsable',
             ])
+            //Stagiaires
+            ->add('participants', EntityType::class, [
+                'class'         => User::class,
+                'choice_label'  => fn(User $u)  => $u->getFullName(),
+                'query_builder' => fn($repo) => $repo->createQueryBuilder('u')
+                    ->where('u.role = :r')->setParameter('r', 'STAGIAIRE'),
+                'expanded'      => true, // cases à cocher
+                'multiple'      => true,
+                'choice_attr'   => fn(User $u)   => [
+                    'class' => 'form-checkbox h-4 w-4 text-blue-600',
+                ],
+                'label'         => 'Stagiaires',
+            ])
             // Dates
             ->add('dateDebut', DateTimeType::class, [
                 'widget' => 'single_text',

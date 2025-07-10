@@ -29,6 +29,16 @@
   {{- parent() -}}
 {%- endblock %}
 
+
+{# ============ Checkbox simples ============ #}
+{% block checkbox_widget -%}
+  {# On injecte la classe Tailwind pour une case à cocher moderne #}
+  {% set attr = attr|merge({
+     'class': (attr.class|default('form-checkbox h-5 w-5 text-blue-600'))
+  }) %}
+  {{- parent() -}}
+{%- endblock checkbox_widget %}
+
 {# textarea #}
 {% block textarea_widget -%}
   {% set attr = attr|merge({'class': (attr.class|default('block w-full border border-gray-300 rounded p-2 focus:ring focus:ring-opacity-50')), 'rows': attr.rows|default(3)}) %}
