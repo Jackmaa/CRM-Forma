@@ -1,112 +1,51 @@
 <template>
-    <section class="p-6 bg-gray-50 h-full">
+    <section class="p-6 bg-gray-50 h-full overflow-y-auto overflow-x-hidden">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-semibold">Statistiques de gestion</h2>
+            <h2 class="text-3xl font-semibold">Statistiques de gestion</h2>
         </div>
 
         <!-- KPI Cards -->
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-4 rounded shadow flex items-center">
-                <Users class="w-8 h-8 text-blue-500 mr-4" />
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div
+                v-for="card in kpis"
+                :key="card.label"
+                class="bg-white p-5 rounded-lg shadow hover:shadow-lg transition flex items-center space-x-4"
+            >
+                <component :is="card.icon" class="w-8 h-8 text-indigo-500" />
                 <div>
-                    <p class="text-sm text-gray-500">Utilisateurs</p>
-                    <p class="text-2xl font-bold">{{ stats.users }}</p>
+                    <p class="text-xs text-gray-400 uppercase">
+                        {{ card.label }}
+                    </p>
+                    <p class="text-3xl font-bold">{{ card.value }}</p>
                 </div>
-            </div>
-            <div class="bg-white p-4 rounded shadow flex items-center">
-                <BookOpen class="w-8 h-8 text-green-500 mr-4" />
-                <div>
-                    <p class="text-sm text-gray-500">Formations</p>
-                    <p class="text-2xl font-bold">{{ stats.formations }}</p>
-                </div>
-            </div>
-            <div class="bg-white p-4 rounded shadow flex items-center">
-                <BarChart2 class="w-8 h-8 text-purple-500 mr-4" />
-                <div>
-                    <p class="text-sm text-gray-500">Rapports</p>
-                    <p class="text-2xl font-bold">{{ stats.reports }}</p>
-                </div>
-            </div>
-            <div class="bg-white p-4 rounded shadow flex items-center">
-                <Activity class="w-8 h-8 text-red-500 mr-4" />
-                <div>
-                    <p class="text-sm text-gray-500">Sessions actives</p>
-                    <p class="text-2xl font-bold">{{ stats.sessions }}</p>
-                </div>
-            </div>
-        </div>
-        <!-- Monthly Activity Chart -->
-        <div class="bg-white p-6 rounded shadow over">
-            <h3 class="text-lg font-semibold mb-4">Activité mensuelle</h3>
-            <div style="height: 300px">
-                <!-- Use correct prop names for vue-chartjs -->
-                <Line
-                    :data="chartData"
-                    :options="chartOptions"
-                    id="line-chart"
-                />
             </div>
         </div>
     </section>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { Users, BookOpen, BarChart2, Activity } from "lucide-vue-next";
+import { reactive, onMounted } from "vue";
 import {
-    Chart as ChartJS,
-    Title,
-    Tooltip,
-    Legend,
-    LineElement,
-    PointElement,
-    CategoryScale,
-    LinearScale,
-} from "chart.js";
-import { Line } from "vue-chartjs";
+    UsersIcon as Users,
+    BookOpenIcon as BookOpen,
+    ActivityIcon as Activity,
+} from "lucide-vue-next";
 
-// Register Chart.js components
-ChartJS.register(
-    Title,
-    Tooltip,
-    Legend,
-    LineElement,
-    PointElement,
-    CategoryScale,
-    LinearScale
-);
+const kpis = reactive([
+    { label: "Utilisateurs", key: "users", icon: Users, value: "…" },
+    { label: "Formations", key: "formations", icon: BookOpen, value: "…" },
+    { label: "Sessions actives", key: "sessions", icon: Activity, value: "…" },
+]);
 
-// KPI stats
-const stats = ref({ users: 0, formations: 0, reports: 0, sessions: 0 });
+async function loadKpis() {
+    const res = await fetch("/api/stats/kpis");
+    if (!res.ok) return;
+    const data = await res.json();
+    kpis.forEach((card) => {
+        card.value = data[card.key] ?? 0;
+    });
+}
 
-// Chart data as ref
-const chartData = ref({ labels: [], datasets: [] });
-
-// Chart options
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: { y: { beginAtZero: true } },
-};
-
-onMounted(() => {
-    // Replace with real API calls
-    stats.value = { users: 187, formations: 42, reports: 18, sessions: 256 };
-
-    const labels = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin"];
-    const dataValues = [30, 45, 60, 50, 70, 85];
-
-    chartData.value = {
-        labels,
-        datasets: [
-            {
-                label: "Visites",
-                data: dataValues,
-                fill: false,
-                borderWidth: 2,
-            },
-        ],
-    };
-});
+onMounted(loadKpis);
 </script>

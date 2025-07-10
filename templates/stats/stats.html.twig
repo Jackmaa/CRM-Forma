@@ -1,8 +1,5 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-<div class="flex">
+
   <div {{ vue_component('Stats/Stat') }}></div>
-</div>
-<script type="module" src="http://localhost:5173/@vite/client"></script>
-<script type="module" src="http://localhost:5173/assets/stats.js"></script>
 {% endblock %}

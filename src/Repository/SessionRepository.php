@@ -1,6 +1,7 @@
 <?php
 namespace App\Repository;
 
+use App\Entity\Centre;
 use App\Entity\Session;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -82,28 +83,27 @@ class SessionRepository extends ServiceEntityRepository {
             ->getResult();
     }
 
-    //    /**
-    //     * @return Session[] Returns an array of Session objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('s.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function countActive(Centre $centre): int {
+        return (int) $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->andWhere('s.centre = :centre')
+            ->andWhere('s.dateDebut <= :now')
+            ->andWhere('s.dateFin   >= :now')
+            ->setParameter('centre', $centre)
+            ->setParameter('now', new \DateTime())
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Session
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function countFinishedThisMonth(Centre $centre): int {
+        return (int) $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->andWhere('s.centre = :centre')
+            ->andWhere('s.dateFin BETWEEN :start AND :end')
+            ->setParameter('centre', $centre)
+            ->setParameter('start', (new \DateTime('first day of this month'))->setTime(0, 0))
+            ->setParameter('end', (new \DateTime('last day of this month'))->setTime(23, 59, 59))
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }
