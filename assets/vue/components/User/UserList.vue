@@ -65,6 +65,24 @@
                 class="w-full max-w-md px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-300"
             />
         </div>
+        <!-- Filtre par rôle -->
+        <div class="mb-4 flex items-center space-x-2">
+            <label for="role-filter" class="font-medium">Rôle :</label>
+            <select
+                id="role-filter"
+                v-model="roleFilter"
+                class="border px-2 py-1 rounded"
+            >
+                <option value="">Tous</option>
+                <option
+                    v-for="opt in roleOptions"
+                    :key="opt.value"
+                    :value="opt.value"
+                >
+                    {{ opt.label }}
+                </option>
+            </select>
+        </div>
 
         <!-- User cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -196,15 +214,18 @@ const saving = ref(false);
 const error = ref("");
 const successId = ref(null);
 const dropdownOpen = ref(false);
+const roleFilter = ref("");
 
 const filteredUsers = computed(() => {
     const term = searchTerm.value.toLowerCase();
-    return users.value.filter(
-        (u) =>
+    return users.value.filter((u) => {
+        const matchesSearch =
             u.prenom.toLowerCase().includes(term) ||
             u.nom.toLowerCase().includes(term) ||
-            u.email.toLowerCase().includes(term)
-    );
+            u.email.toLowerCase().includes(term);
+        const matchesRole = !roleFilter.value || u.role === roleFilter.value;
+        return matchesSearch && matchesRole;
+    });
 });
 
 // 1) Mapping de l'Enum UserRole => Label humain
