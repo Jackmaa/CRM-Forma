@@ -95,7 +95,10 @@
 import { ref, computed, onMounted } from "vue";
 import { Plus } from "lucide-vue-next";
 
-const formationNewUrl = window.APP_ROUTES?.formationNew || "/formation/new";
+const props = defineProps({
+    apiUrl: { type: String, required: true },
+    newUrl: { type: String, required: true },
+});
 const formationShowTemplate =
     window.APP_ROUTES?.formationShow || "/formation/ID_PLACEHOLDER";
 const formationSaveUrl =
@@ -122,7 +125,7 @@ function getShowUrl(id) {
 }
 
 function goToNewFormation() {
-    window.location.assign(formationNewUrl);
+    window.location.assign(props.newUrl);
 }
 
 function editFormation(f) {
@@ -163,7 +166,7 @@ async function saveFormation(f) {
 }
 
 onMounted(async () => {
-    const data = await fetch("/formation/api").then((res) => res.json());
+    const data = await fetch(props.apiUrl).then((res) => res.json());
     formations.value = data.map((f) => ({
         id: f.id,
         titre: f.title,

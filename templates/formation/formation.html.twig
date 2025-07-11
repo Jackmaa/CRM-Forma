@@ -3,13 +3,17 @@
 {% block body %}
 <div class="flex">
     <main class="flex-1 space-y-6">
-      <div {{ vue_component('Formations/FormationList') }}></div>
+      <div {{ vue_component('Formations/FormationTabs') }}></div>
     </main>
 </div>
 
+
 <script>
   window.APP_ROUTES = {
-    formationNew: "{{ path('formation_new') }}"
+    formationApi: "{{ path('formation_api') }}",
+    formationNew: "{{ path('formation_new') }}",
+    sessionApi:   "{{ path('api_session_list') }}",
+    sessionNew:   "{{ path('session_new') }}"
   };
 </script>
 {% endblock %}

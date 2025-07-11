@@ -5,9 +5,10 @@
             <h2 class="text-2xl font-semibold">Mes sessions</h2>
             <button
                 @click="goToNew"
-                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
             >
-                ➕ Nouvelle session
+                <Plus class="w-5 h-5 mr-2" />
+                Nouvelle session
             </button>
         </div>
 
@@ -61,26 +62,41 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { Plus } from "lucide-vue-next";
+
+// 1. Props en haut
+const props = defineProps({
+    apiUrl: { type: String, required: true },
+    newUrl: { type: String, required: true },
+});
 
 const sessions = ref([]);
 const search = ref("");
 
-// Récupère la liste
+// 2. Chargement + mapping pour unifier les clés
 async function load() {
-    const res = await fetch("/session/api");
+    const res = await fetch(props.apiUrl);
     if (!res.ok) return;
-    sessions.value = await res.json();
+    const data = await res.json();
+    sessions.value = data.map((s) => ({
+        id: s.id,
+        titre: s.titre, // correspond à ton API
+        dateDebut: s.dateDebut,
+        dateFin: s.dateFin,
+        // normalisation du booléen
+        isActive: s.isActive === true || s.isActive === 1 || s.isActive === "1",
+    }));
 }
 
-// Search filter
+// 3. Filtre sur le bon champ
 const filtered = computed(() => {
     const term = search.value.toLowerCase();
     return sessions.value.filter((s) => s.titre.toLowerCase().includes(term));
 });
 
-// Navigation
+// 4. Navigation et utilitaires
 function goToNew() {
-    window.location.href = "/session/new";
+    window.location.href = props.newUrl;
 }
 function showUrl(id) {
     return `/session/${id}`;
@@ -88,8 +104,6 @@ function showUrl(id) {
 function edit(id) {
     window.location.href = `/session/${id}/edit`;
 }
-
-// Format ISO → FR
 function formatDate(iso) {
     if (!iso) return "";
     const d = new Date(iso);
@@ -102,7 +116,3 @@ function formatDate(iso) {
 
 onMounted(load);
 </script>
-
-<style scoped>
-/* Rien de spécial ici */
-</style>
