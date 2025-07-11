@@ -10,11 +10,8 @@
       <div {{ vue_component('Dashboard/StatsCard', { label: 'Factures en retard', value: 2 }) }}></div>
       <div {{ vue_component('Dashboard/StatsCard', { label: 'Taux de remplissage', value: '87%' }) }}></div>
     </div>
-    <div {{ vue_component('Dashboard/PlanningCard') }}></div>
-    <div {{ vue_component('Dashboard/RecentActivity', { items: [
-      { id:1, title:'Nouveau devis créé', subtitle:'TechCorp' },
-      { id:2, title:'Formation Excel terminée', subtitle:'Il y a 4h' }
-    ] }) }}></div>
+
+    <div {{ vue_component('Dashboard/RecentActivity')}}></div>
     <div {{ vue_component('Dashboard/QuickActions') }}></div>
   </main>
 </div>
