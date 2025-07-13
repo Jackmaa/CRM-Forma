@@ -1,154 +1,161 @@
 <template>
-    <section class="card bg-base-100 shadow-lg p-6 space-y-6">
-        <div v-if="!editing">
-            <h1 class="text-2xl font-semibold text-base-content">
+    <div class="space-y-6">
+        <!-- 🚀 Hero Bar -->
+        <div
+            class="flex flex-col md:flex-row md:justify-between items-start md:items-center bg-base-100 p-4 rounded-lg shadow"
+        >
+            <h1 class="text-3xl font-bold text-base-content">
                 {{ user.prenom }} {{ user.nom }}
             </h1>
-
-            <div
-                class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-base-content"
-            >
-                <div class="space-y-2">
-                    <p>
-                        <span class="font-semibold">Prénom :</span>
-                        {{ user.prenom }}
-                    </p>
-                    <p>
-                        <span class="font-semibold">Nom :</span> {{ user.nom }}
-                    </p>
-                    <p>
-                        <span class="font-semibold">Email :</span>
-                        {{ user.email }}
-                    </p>
-                    <p>
-                        <span class="font-semibold">Rôle :</span>
-                        {{ user.role }}
-                    </p>
-                    <p>
-                        <span class="font-semibold">Actif :</span>
-                        {{ user.isActive ? "Oui" : "Non" }}
-                    </p>
-                </div>
-            </div>
-
-            <div v-if="isAdmin" class="flex gap-2 mt-6">
-                <button @click="startEdit" class="btn btn-primary btn-sm">
-                    Modifier
-                </button>
-                <form :action="deleteUrl" method="post" @submit="confirmDelete">
-                    <input type="hidden" name="_token" :value="csrfToken" />
-                    <button type="submit" class="btn btn-error btn-sm">
-                        Supprimer
+            <div class="mt-3 md:mt-0 flex gap-2">
+                <template v-if="!editing">
+                    <button @click="startEdit" class="btn btn-outline btn-sm">
+                        ✏️ Éditer
                     </button>
-                </form>
+                    <form
+                        :action="deleteUrl"
+                        method="post"
+                        @submit="confirmDelete"
+                        class="inline"
+                    >
+                        <input type="hidden" name="_token" :value="csrfToken" />
+                        <button class="btn btn-error btn-outline btn-sm">
+                            🗑️ Supprimer
+                        </button>
+                    </form>
+                </template>
+
+                <template v-else>
+                    <button
+                        @click="saveChanges"
+                        class="btn btn-success btn-sm"
+                        :disabled="saving"
+                    >
+                        {{ saving ? "Enregistrement…" : "Enregistrer" }}
+                    </button>
+                    <button @click="cancelEdit" class="btn btn-ghost btn-sm">
+                        Annuler
+                    </button>
+                </template>
             </div>
         </div>
 
-        <form v-else @submit.prevent="saveChanges" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text text-base-content">Prénom</span>
-                    </label>
-                    <input
-                        v-model="form.prenom"
-                        class="input input-bordered w-full"
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 📝 Résumé (colonne de gauche) -->
+            <div class="lg:col-span-1 space-y-4">
+                <SectionCard icon="User" title="Détails utilisateurs">
+                    <InfoRow label="Prénom" :value="user.prenom" />
+                    <InfoRow label="Nom" :value="user.nom" />
+                    <InfoRow label="Email" :value="user.email" />
+                    <InfoRow label="Rôle" :value="roleLabel(user.role)" />
+                    <InfoRow
+                        label="Actif"
+                        :value="user.isActive ? 'Oui' : 'Non'"
                     />
-                </div>
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text text-base-content">Nom</span>
-                    </label>
-                    <input
-                        v-model="form.nom"
-                        class="input input-bordered w-full"
-                    />
-                </div>
-                <div class="form-control md:col-span-2">
-                    <label class="label">
-                        <span class="label-text text-base-content">Email</span>
-                    </label>
-                    <input
-                        type="email"
-                        v-model="form.email"
-                        class="input input-bordered w-full"
-                    />
-                </div>
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text text-base-content">Rôle</span>
-                    </label>
-                    <select
-                        v-model="form.role"
-                        class="select select-bordered w-full"
-                    >
-                        <option value="ADMIN_CENTRE">
-                            Administrateur Centre
-                        </option>
-                        <option value="FORMATEUR">Formateur</option>
-                        <option value="STAGIAIRE">Stagiaire</option>
-                        <option value="ASSISTANT">Assistant</option>
-                    </select>
-                </div>
-                <div class="form-control">
-                    <label class="label cursor-pointer">
-                        <span class="label-text text-base-content"
-                            >Compte actif</span
-                        >
-                        <input
-                            type="checkbox"
-                            v-model="form.isActive"
-                            class="toggle toggle-primary"
-                        />
-                    </label>
-                </div>
-                <div class="form-control md:col-span-2">
-                    <label class="label">
-                        <span class="label-text text-base-content"
-                            >Nouveau mot de passe</span
-                        >
-                    </label>
-                    <input
-                        type="password"
-                        v-model="form.password"
-                        placeholder="Laisser vide pour conserver l'actuel"
-                        class="input input-bordered w-full"
-                    />
-                </div>
+                </SectionCard>
             </div>
 
-            <div class="flex gap-2 mt-3">
-                <button
-                    type="submit"
-                    :disabled="saving"
-                    class="btn btn-success btn-sm"
-                >
-                    <span v-if="saving">Sauvegarde...</span>
-                    <span v-else>Enregistrer</span>
-                </button>
-                <button
-                    type="button"
-                    @click="cancelEdit"
-                    class="btn btn-ghost btn-sm"
-                >
-                    Annuler
-                </button>
-            </div>
+            <!-- 🖊️ Formulaire d'édition (colonne de droite) -->
+            <div class="lg:col-span-2">
+                <template v-if="editing">
+                    <form @submit.prevent="saveChanges" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormControl label="Prénom" :error="errors.prenom">
+                                <input
+                                    v-model="form.prenom"
+                                    class="input input-bordered w-full"
+                                />
+                            </FormControl>
+                            <FormControl label="Nom" :error="errors.nom">
+                                <input
+                                    v-model="form.nom"
+                                    class="input input-bordered w-full"
+                                />
+                            </FormControl>
+                            <FormControl
+                                label="Email"
+                                :error="errors.email"
+                                class="md:col-span-2"
+                            >
+                                <input
+                                    type="email"
+                                    v-model="form.email"
+                                    class="input input-bordered w-full"
+                                />
+                            </FormControl>
+                            <FormControl
+                                label="Rôle"
+                                :error="errors.role"
+                                class="md:col-span-2"
+                            >
+                                <select
+                                    v-model="form.role"
+                                    class="select select-bordered w-full"
+                                >
+                                    <option value="ADMIN_CENTRE">
+                                        Administrateur Centre
+                                    </option>
+                                    <option value="FORMATEUR">Formateur</option>
+                                    <option value="STAGIAIRE">Stagiaire</option>
+                                    <option value="ASSISTANT">Assistant</option>
+                                </select>
+                            </FormControl>
+                            <FormControl
+                                label="Compte actif"
+                                class="md:col-span-2"
+                            >
+                                <label
+                                    class="label cursor-pointer justify-start gap-2"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        v-model="form.isActive"
+                                        class="toggle toggle-primary"
+                                    />
+                                    <span class="label-text">Actif</span>
+                                </label>
+                            </FormControl>
+                            <FormControl
+                                label="Nouveau mot de passe"
+                                :error="errors.password"
+                                class="md:col-span-2"
+                            >
+                                <input
+                                    type="password"
+                                    v-model="form.password"
+                                    placeholder="Laisser vide pour conserver l'actuel"
+                                    class="input input-bordered w-full"
+                                />
+                            </FormControl>
+                        </div>
 
-            <p v-if="error" class="text-error">{{ error }}</p>
-            <p v-if="success" class="text-success">{{ success }}</p>
-        </form>
-    </section>
+                        <p v-if="errorGeneral" class="text-error">
+                            {{ errorGeneral }}
+                        </p>
+                    </form>
+                </template>
+
+                <template v-else>
+                    <!-- lorsque non-édition, affiche rien ici -->
+                </template>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
+import InfoRow from "@/components/InfoRow.vue";
+import SectionCard from "@/components/SectionCard.vue";
+import FormControl from "@/components/FormControl.vue";
+
 export default {
+    components: { InfoRow, SectionCard, FormControl },
     props: {
-        user: Object,
-        saveUrl: String,
-        deleteUrl: String,
-        csrfToken: String,
-        isAdmin: Boolean,
+        user: { type: Object, required: true },
+        saveUrl: { type: String, required: true },
+        deleteUrl: { type: String, required: true },
+        csrfToken: { type: String, required: true },
+        isAdmin: { type: Boolean, default: false },
     },
     data() {
         return {
@@ -161,16 +168,17 @@ export default {
                 isActive: this.user.isActive,
                 password: "",
             },
+            errors: {},
+            errorGeneral: "",
             saving: false,
-            error: "",
             success: "",
         };
     },
     methods: {
         startEdit() {
             this.editing = true;
-            this.error = "";
-            this.success = "";
+            this.errors = {};
+            this.errorGeneral = "";
         },
         cancelEdit() {
             this.editing = false;
@@ -182,42 +190,54 @@ export default {
                 isActive: this.user.isActive,
                 password: "",
             });
-            this.error = "";
-            this.success = "";
+            this.errors = {};
+            this.errorGeneral = "";
         },
         confirmDelete(e) {
-            if (
-                !confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")
-            ) {
+            if (!confirm("Confirmer la suppression ?")) {
                 e.preventDefault();
             }
         },
         async saveChanges() {
             this.saving = true;
-            this.error = "";
-            this.success = "";
-            try {
-                const payload = { ...this.form };
-                if (!payload.password) delete payload.password;
-                const res = await fetch(this.saveUrl, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                });
-                if (!res.ok) throw new Error("Erreur lors de la sauvegarde");
+            this.errors = {};
+            this.errorGeneral = "";
+
+            const payload = { ...this.form };
+            if (!payload.password) delete payload.password;
+
+            const res = await fetch(this.saveUrl, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            if (res.ok) {
                 this.success = "Modifications enregistrées.";
                 this.editing = false;
                 Object.assign(this.user, payload);
-            } catch (err) {
-                this.error = err.message;
-            } finally {
-                this.saving = false;
+            } else if (res.status === 400) {
+                const json = await res.json();
+                this.errors = json.violations || {};
+                this.errorGeneral = json.message || "";
+            } else {
+                this.errorGeneral = "Une erreur est survenue.";
             }
+            this.saving = false;
+        },
+        roleLabel(value) {
+            const map = {
+                ADMIN_CENTRE: "Administrateur Centre",
+                FORMATEUR: "Formateur",
+                STAGIAIRE: "Stagiaire",
+                ASSISTANT: "Assistant",
+            };
+            return map[value] || value;
         },
     },
 };
 </script>
 
 <style scoped>
-/* DaisyUI gère les styles */
+/* DaisyUI + Tailwind gèrent tout le style */
 </style>
