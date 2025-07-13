@@ -9,21 +9,24 @@
 
         <!-- KPI Cards DaisyUI -->
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div
+            <a
                 v-for="card in kpis"
                 :key="card.label"
-                class="card bg-base-100 shadow-lg hover:shadow-xl transition p-5 flex items-center space-x-4"
+                :href="routes[card.key]"
+                class="card bg-base-100 shadow-lg hover:shadow-xl transition p-5 flex items-center space-x-4 hover:bg-base-200 transform hover:-translate-y-1 cursor-pointer"
             >
-                <component :is="card.icon" class="w-8 h-8 text-primary" />
-                <div>
-                    <p class="text-xs uppercase text-base-content opacity-60">
-                        {{ card.label }}
-                    </p>
+                <div
+                    class="flex flex-row items-center justify-center space-x-4"
+                >
                     <p class="text-3xl font-bold text-base-content">
                         {{ card.value }}
                     </p>
+                    <component :is="card.icon" class="w-8 h-8 text-primary" />
+                    <p class="text-xs uppercase text-base-content opacity-60">
+                        {{ card.label }}
+                    </p>
                 </div>
-            </div>
+            </a>
         </div>
     </section>
 </template>
@@ -36,6 +39,7 @@ import {
     Activity as ActivityIcon,
 } from "lucide-vue-next";
 
+// données des KPI
 const kpis = reactive([
     { label: "Utilisateurs", key: "users", icon: UsersIcon, value: "…" },
     { label: "Formations", key: "formations", icon: BookOpenIcon, value: "…" },
@@ -46,6 +50,13 @@ const kpis = reactive([
         value: "…",
     },
 ]);
+
+// mapping clé → URL cible
+const routes = {
+    users: "/user",
+    formations: "/formation#formations",
+    sessions: "/formation#sessions",
+};
 
 async function loadKpis() {
     const res = await fetch("/api/stats/kpis");
@@ -60,5 +71,5 @@ onMounted(loadKpis);
 </script>
 
 <style scoped>
-/* DaisyUI gère le style, pas de CSS custom nécessaire */
+/* Pas de CSS custom ; DaisyUI + Tailwind gèrent tout */
 </style>

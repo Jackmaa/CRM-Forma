@@ -1,58 +1,79 @@
 <template>
-    <section class="p-6 bg-base-200 h-full overflow-auto">
-        <!-- Onglets DaisyUI -->
-        <div class="tabs mb-6">
+    <section class="p-6">
+        <!-- Onglets stylés DaisyUI -->
+        <div
+            class="tabs tabs-boxed tabs-lifted bg-base-200 rounded-lg overflow-hidden mb-6"
+        >
             <button
-                type="button"
-                @click="tab = 'formations'"
-                class="tab tab-bordered"
-                :class="{ 'tab-active': tab === 'formations' }"
+                class="tab flex-1 text-base-content transition-colors duration-200 hover:bg-base-300"
+                :class="{
+                    'tab-active bg-primary text-primary-content':
+                        tab === 'formations',
+                }"
+                @click="setTab('formations')"
             >
+                <!-- Vous pouvez ajouter une icône ici si vous le souhaitez -->
                 Formations
             </button>
             <button
-                type="button"
-                @click="tab = 'sessions'"
-                class="tab tab-bordered"
-                :class="{ 'tab-active': tab === 'sessions' }"
+                class="tab flex-1 text-base-content transition-colors duration-200 hover:bg-base-300"
+                :class="{
+                    'tab-active bg-primary text-primary-content':
+                        tab === 'sessions',
+                }"
+                @click="setTab('sessions')"
             >
                 Sessions
             </button>
         </div>
 
-        <!-- Contenus -->
-        <div v-if="tab === 'formations'">
-            <FormationList
-                :api-url="routes.formationApi"
-                :new-url="routes.formationNew"
-            />
-        </div>
-        <div v-else>
-            <SessionList
-                :api-url="routes.sessionApi"
-                :new-url="routes.sessionNew"
-            />
-        </div>
+        <FormationList
+            v-if="tab === 'formations'"
+            :api-url="routes.formationApi"
+            :new-url="routes.formationNew"
+        />
+        <SessionList
+            v-else
+            :api-url="routes.sessionApi"
+            :new-url="routes.sessionNew"
+        />
     </section>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import FormationList from "./FormationList.vue";
 import SessionList from "../Session/SessionList.vue";
 
-// État de l’onglet actif
 const tab = ref("formations");
-
-// Routes injectées par Twig (window.APP_ROUTES)
 const routes = {
     formationApi: window.APP_ROUTES.formationApi,
     formationNew: window.APP_ROUTES.formationNew,
     sessionApi: window.APP_ROUTES.sessionApi,
     sessionNew: window.APP_ROUTES.sessionNew,
 };
+
+function setTab(value) {
+    tab.value = value;
+    location.hash = value;
+}
+
+function handleHash() {
+    const h = location.hash.replace("#", "");
+    if (h === "sessions" || h === "formations") {
+        tab.value = h;
+    }
+}
+
+onMounted(() => {
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+});
+onBeforeUnmount(() => {
+    window.removeEventListener("hashchange", handleHash);
+});
 </script>
 
 <style scoped>
-/* DaisyUI tabs gèrent déjà le style et la transition */
+/* Les classes DaisyUI gèrent le style, pas de CSS custom nécessaire ici */
 </style>
