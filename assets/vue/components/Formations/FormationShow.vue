@@ -1,5 +1,7 @@
 <template>
-    <div class="space-y-6">
+    <section class="space-y-6">
+        <ToastContainer class="fixed top-1 right-1 z-50" />
+
         <!-- 🚀 Hero Bar -->
         <div
             class="flex flex-col md:flex-row md:justify-between items-start md:items-center bg-base-100 p-4 rounded-lg shadow"
@@ -8,7 +10,6 @@
                 {{ formation.titre }}
             </h1>
             <div class="mt-3 md:mt-0 flex gap-2">
-                <!-- Affichage / Edition -->
                 <template v-if="!editing">
                     <button @click="startEdit" class="btn btn-outline btn-sm">
                         ✏️ Éditer
@@ -257,16 +258,23 @@
                 </template>
             </div>
         </div>
-    </div>
+    </section>
 </template>
 
 <script>
+import { toast } from "@/composables/useToast";
 import InfoRow from "@/components/InfoRow.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import FormControl from "@/components/FormControl.vue";
+import ToastContainer from "@/components/ToastContainer.vue";
 
 export default {
-    components: { InfoRow, SectionCard, FormControl },
+    components: {
+        ToastContainer,
+        InfoRow,
+        SectionCard,
+        FormControl,
+    },
     props: {
         formation: { type: Object, required: true },
         saveUrl: { type: String, required: true },
@@ -281,7 +289,6 @@ export default {
             errors: {},
             errorGeneral: "",
             saving: false,
-            success: "",
         };
     },
     methods: {
@@ -293,6 +300,8 @@ export default {
         cancelEdit() {
             this.editing = false;
             this.form = { ...this.formation };
+            this.errors = {};
+            this.errorGeneral = "";
         },
         addModalite() {
             this.form.modalites = this.form.modalites || [];
@@ -320,15 +329,19 @@ export default {
             });
 
             if (res.ok) {
-                this.success = "Modifications enregistrées.";
+                toast.success("Formation mise à jour !");
                 this.editing = false;
+                Object.assign(this.formation, this.form);
             } else if (res.status === 400) {
                 const json = await res.json();
                 this.errors = json.violations || {};
                 this.errorGeneral = json.message || "";
+                toast.error("Erreur de validation");
             } else {
                 this.errorGeneral = "Une erreur est survenue.";
+                toast.error("Échec de la mise à jour");
             }
+
             this.saving = false;
         },
         confirmDelete(e) {
@@ -336,13 +349,12 @@ export default {
         },
         formatDate(d) {
             if (!d) return "";
-            const dt = new Date(d);
-            return dt.toLocaleString("fr-FR");
+            return new Date(d).toLocaleString("fr-FR");
         },
     },
 };
 </script>
 
 <style scoped>
-/* DaisyUI + Tailwind gèrent tout le style */
+/* Tout le style est assuré par Tailwind + DaisyUI */
 </style>
