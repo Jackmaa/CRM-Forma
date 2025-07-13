@@ -1,226 +1,269 @@
 <template>
-    <section class="p-6 bg-white shadow rounded space-y-6">
-        <div v-if="!editing">
-            <h1 class="text-2xl font-semibold">{{ formation.titre }}</h1>
+    <div class="card bg-base-100 shadow-lg p-6 space-y-6">
+        <!-- Affichage ou édition -->
+        <template v-if="!editing">
+            <h1 class="text-2xl font-semibold text-base-content">
+                {{ formation.titre }}
+            </h1>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                    <p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Informations principales -->
+                <div class="space-y-2">
+                    <p class="text-base-content opacity-60">
                         <strong>Thématique :</strong> {{ formation.thematique }}
                     </p>
-                    <p><strong>Niveau :</strong> {{ formation.niveau }}</p>
-                    <p><strong>Durée :</strong> {{ formation.duree }} heures</p>
-                    <p><strong>Tarif :</strong> {{ formation.tarif }} €</p>
-                    <p>
-                        <strong>Date de création :</strong>
+                    <p class="text-base-content opacity-60">
+                        <strong>Niveau :</strong> {{ formation.niveau }}
+                    </p>
+                    <p class="text-base-content opacity-60">
+                        <strong>Durée :</strong> {{ formation.duree }} h
+                    </p>
+                    <p class="text-base-content opacity-60">
+                        <strong>Tarif :</strong> {{ formation.tarif }} €
+                    </p>
+                    <p class="text-base-content opacity-60">
+                        <strong>Créé le :</strong>
                         {{ formatDate(formation.createdAt) }}
                     </p>
-                    <p v-if="formation.responsable">
+                    <p
+                        v-if="formation.responsable"
+                        class="text-base-content opacity-60"
+                    >
                         <strong>Responsable :</strong>
                         {{ formation.responsable }}
                     </p>
                 </div>
-                <div>
-                    <p><strong>Prérequis :</strong></p>
-                    <div
-                        class="mt-1 p-2 bg-gray-50 border rounded whitespace-pre-line"
-                    >
-                        {{ formation.prerequis }}
+                <!-- Descriptions -->
+                <div class="space-y-4">
+                    <div>
+                        <p class="font-medium text-base-content">Prérequis</p>
+                        <div
+                            class="p-4 bg-base-200 rounded whitespace-pre-line text-base-content"
+                        >
+                            {{ formation.prerequis }}
+                        </div>
                     </div>
-                    <p class="mt-4"><strong>Description :</strong></p>
-                    <div
-                        class="mt-1 p-2 bg-gray-50 border rounded whitespace-pre-line"
-                    >
-                        {{ formation.description }}
+                    <div>
+                        <p class="font-medium text-base-content">Description</p>
+                        <div
+                            class="p-4 bg-base-200 rounded whitespace-pre-line text-base-content"
+                        >
+                            {{ formation.description }}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div v-if="formation.modalites && formation.modalites.length">
-                <h2 class="text-lg font-semibold mt-4">
+            <!-- Modalités et objectifs -->
+            <div v-if="formation.modalites?.length" class="space-y-2">
+                <p class="font-semibold text-base-content">
                     Modalités pédagogiques
-                </h2>
-                <ul class="list-disc list-inside mt-2">
+                </p>
+                <ul class="list-disc list-inside text-base-content opacity-80">
                     <li v-for="(m, i) in formation.modalites" :key="i">
                         {{ m }}
                     </li>
                 </ul>
             </div>
-
-            <div v-if="formation.objectifs && formation.objectifs.length">
-                <h2 class="text-lg font-semibold mt-4">
+            <div v-if="formation.objectifs?.length" class="space-y-2">
+                <p class="font-semibold text-base-content">
                     Objectifs pédagogiques
-                </h2>
-                <ul class="list-disc list-inside mt-2">
+                </p>
+                <ul class="list-disc list-inside text-base-content opacity-80">
                     <li v-for="(o, i) in formation.objectifs" :key="i">
                         {{ o }}
                     </li>
                 </ul>
             </div>
 
-            <div v-if="isAdmin" class="mt-6 flex gap-2">
-                <button
-                    @click="startEdit"
-                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
+            <!-- Actions Admin -->
+            <div v-if="isAdmin" class="flex gap-4 mt-4">
+                <button @click="startEdit" class="btn btn-primary btn-sm">
                     Modifier
                 </button>
                 <form :action="deleteUrl" method="post" @submit="confirmDelete">
                     <input type="hidden" name="_token" :value="csrfToken" />
-                    <button
-                        type="submit"
-                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                    >
+                    <button type="submit" class="btn btn-error btn-sm">
                         Supprimer
                     </button>
                 </form>
             </div>
-        </div>
+        </template>
 
-        <!-- Mode édition -->
-        <form v-else @submit.prevent="saveChanges" class="space-y-2">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm">Titre</label>
-                    <input
-                        v-model="form.titre"
-                        class="w-full border rounded px-2 py-1"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm">Thématique</label>
-                    <input
-                        v-model="form.thematique"
-                        class="w-full border rounded px-2 py-1"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm">Niveau</label>
-                    <input
-                        v-model="form.niveau"
-                        class="w-full border rounded px-2 py-1"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm">Durée (heures)</label>
-                    <input
-                        v-model="form.duree"
-                        type="number"
-                        class="w-full border rounded px-2 py-1"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm">Tarif (€)</label>
-                    <input
-                        v-model="form.tarif"
-                        type="number"
-                        class="w-full border rounded px-2 py-1"
-                    />
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm">Prérequis</label>
-                    <textarea
-                        v-model="form.prerequis"
-                        class="w-full border rounded px-2 py-1"
-                    ></textarea>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm">Description</label>
-                    <textarea
-                        v-model="form.description"
-                        class="w-full border rounded px-2 py-1"
-                    ></textarea>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm">Modalités pédagogiques</label>
-                    <div class="space-y-2">
-                        <div
-                            v-for="(modalite, index) in form.modalites"
-                            :key="index"
-                            class="flex items-center gap-2"
+        <!-- Formulaire édition -->
+        <template v-else>
+            <form @submit.prevent="saveChanges" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label"
+                            ><span class="label-text">Titre</span></label
                         >
-                            <input
-                                v-model="form.modalites[index]"
-                                class="flex-1 border rounded px-2 py-1"
-                            />
+                        <input
+                            v-model="form.titre"
+                            class="input input-bordered"
+                        />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"
+                            ><span class="label-text">Thématique</span></label
+                        >
+                        <input
+                            v-model="form.thematique"
+                            class="input input-bordered"
+                        />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"
+                            ><span class="label-text">Niveau</span></label
+                        >
+                        <input
+                            v-model="form.niveau"
+                            class="input input-bordered"
+                        />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"
+                            ><span class="label-text">Durée (h)</span></label
+                        >
+                        <input
+                            v-model.number="form.duree"
+                            type="number"
+                            class="input input-bordered"
+                        />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"
+                            ><span class="label-text">Tarif (€)</span></label
+                        >
+                        <input
+                            v-model.number="form.tarif"
+                            type="number"
+                            class="input input-bordered"
+                        />
+                    </div>
+                    <div class="form-control md:col-span-2">
+                        <label class="label"
+                            ><span class="label-text">Prérequis</span></label
+                        >
+                        <textarea
+                            v-model="form.prerequis"
+                            class="textarea textarea-bordered"
+                            rows="3"
+                        ></textarea>
+                    </div>
+                    <div class="form-control md:col-span-2">
+                        <label class="label"
+                            ><span class="label-text">Description</span></label
+                        >
+                        <textarea
+                            v-model="form.description"
+                            class="textarea textarea-bordered"
+                            rows="4"
+                        ></textarea>
+                    </div>
+                    <!-- Liste dynamique de modalités -->
+                    <div class="md:col-span-2">
+                        <label class="label"
+                            ><span class="label-text"
+                                >Modalités pédagogiques</span
+                            ></label
+                        >
+                        <div class="space-y-2">
+                            <div
+                                v-for="(m, idx) in form.modalites"
+                                :key="idx"
+                                class="flex items-center gap-2"
+                            >
+                                <input
+                                    v-model="form.modalites[idx]"
+                                    class="input input-bordered flex-1"
+                                />
+                                <button
+                                    type="button"
+                                    @click="removeModalite(idx)"
+                                    class="btn btn-sm btn-ghost"
+                                >
+                                    ✕
+                                </button>
+                            </div>
                             <button
                                 type="button"
-                                @click="removeModalite(index)"
-                                class="text-red-600 hover:text-red-800"
+                                @click="addModalite"
+                                class="btn btn-outline btn-sm"
                             >
-                                ✕
+                                + Ajouter modalité
                             </button>
                         </div>
-                        <button
-                            type="button"
-                            @click="addModalite"
-                            class="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded"
-                        >
-                            + Ajouter une modalité
-                        </button>
                     </div>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm">Objectifs pédagogiques</label>
-                    <div class="space-y-2">
-                        <div
-                            v-for="(objectif, index) in form.objectifs"
-                            :key="index"
-                            class="flex items-center gap-2"
+                    <!-- Liste dynamique d'objectifs -->
+                    <div class="md:col-span-2">
+                        <label class="label"
+                            ><span class="label-text"
+                                >Objectifs pédagogiques</span
+                            ></label
                         >
-                            <input
-                                v-model="form.objectifs[index]"
-                                class="flex-1 border rounded px-2 py-1"
-                            />
+                        <div class="space-y-2">
+                            <div
+                                v-for="(o, idx) in form.objectifs"
+                                :key="idx"
+                                class="flex items-center gap-2"
+                            >
+                                <input
+                                    v-model="form.objectifs[idx]"
+                                    class="input input-bordered flex-1"
+                                />
+                                <button
+                                    type="button"
+                                    @click="removeObjectif(idx)"
+                                    class="btn btn-sm btn-ghost"
+                                >
+                                    ✕
+                                </button>
+                            </div>
                             <button
                                 type="button"
-                                @click="removeObjectif(index)"
-                                class="text-red-600 hover:text-red-800"
+                                @click="addObjectif"
+                                class="btn btn-outline btn-sm"
                             >
-                                ✕
+                                + Ajouter objectif
                             </button>
                         </div>
-                        <button
-                            type="button"
-                            @click="addObjectif"
-                            class="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded"
-                        >
-                            + Ajouter un objectif
-                        </button>
                     </div>
                 </div>
-            </div>
-            <div class="flex gap-2 mt-3">
-                <button
-                    type="submit"
-                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                    :disabled="saving"
-                >
-                    <span v-if="saving">Sauvegarde...</span>
-                    <span v-else>Enregistrer</span>
-                </button>
-                <button
-                    type="button"
-                    @click="cancelEdit"
-                    class="px-4 py-2 bg-gray-300 rounded"
-                >
-                    Annuler
-                </button>
-            </div>
-            <p v-if="error" class="text-red-600">{{ error }}</p>
-            <p v-if="success" class="text-green-600">{{ success }}</p>
-        </form>
-    </section>
+
+                <!-- Actions formulaire -->
+                <div class="flex gap-4">
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                        :disabled="saving"
+                    >
+                        {{ saving ? "Sauvegarde..." : "Enregistrer" }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="cancelEdit"
+                        class="btn btn-ghost"
+                    >
+                        Annuler
+                    </button>
+                </div>
+
+                <p v-if="error" class="text-error">{{ error }}</p>
+                <p v-if="success" class="text-success">{{ success }}</p>
+            </form>
+        </template>
+    </div>
 </template>
 
 <script>
 export default {
     props: {
-        formation: Object,
-        saveUrl: String,
-        deleteUrl: String,
-        csrfToken: String,
-        isAdmin: Boolean,
+        formation: { type: Object, required: true },
+        saveUrl: { type: String, required: true },
+        deleteUrl: { type: String, required: true },
+        csrfToken: { type: String, required: true },
+        isAdmin: { type: Boolean, default: false },
     },
     data() {
         return {
@@ -245,28 +288,25 @@ export default {
             this.form.modalites = this.form.modalites || [];
             this.form.modalites.push("");
         },
-        removeModalite(index) {
-            this.form.modalites.splice(index, 1);
+        removeModalite(i) {
+            this.form.modalites.splice(i, 1);
         },
         addObjectif() {
             this.form.objectifs = this.form.objectifs || [];
             this.form.objectifs.push("");
         },
-        removeObjectif(index) {
-            this.form.objectifs.splice(index, 1);
+        removeObjectif(i) {
+            this.form.objectifs.splice(i, 1);
         },
         async saveChanges() {
             this.saving = true;
             this.error = "";
             this.success = "";
             try {
-                const payload = {
-                    ...this.form,
-                };
                 const res = await fetch(this.saveUrl, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
+                    body: JSON.stringify(this.form),
                 });
                 if (!res.ok) throw new Error("Erreur lors de la sauvegarde");
                 this.success = "Modifications enregistrées.";
@@ -278,56 +318,9 @@ export default {
             }
         },
         confirmDelete(e) {
-            if (
-                !confirm("Êtes-vous sûr de vouloir supprimer cette formation ?")
-            ) {
-                e.preventDefault();
-            }
+            if (!confirm("Confirmer la suppression ?")) e.preventDefault();
         },
         formatDate(dateStr) {
-            if (!dateStr) return "";
-            const d = new Date(dateStr);
-            return (
-                d.toLocaleDateString("fr-FR") +
-                " " +
-                d.toLocaleTimeString("fr-FR")
-            );
-        },
-        cancelEdit() {
-            this.editing = false;
-            this.form = { ...this.formation };
-        },
-        async saveChanges() {
-            this.saving = true;
-            this.error = "";
-            this.success = "";
-            try {
-                const payload = {
-                    ...this.form,
-                };
-                const res = await fetch(this.saveUrl, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                });
-                if (!res.ok) throw new Error("Erreur lors de la sauvegarde");
-                this.success = "Modifications enregistrées.";
-                this.editing = false;
-            } catch (err) {
-                this.error = err.message;
-            } finally {
-                this.saving = false;
-            }
-        },
-        confirmDelete(e) {
-            if (
-                !confirm("Êtes-vous sûr de vouloir supprimer cette formation ?")
-            ) {
-                e.preventDefault();
-            }
-        },
-        formatDate(dateStr) {
-            if (!dateStr) return "";
             const d = new Date(dateStr);
             return (
                 d.toLocaleDateString("fr-FR") +
@@ -338,3 +331,7 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+/* DaisyUI fournit tous les styles, pas de CSS custom nécessaire */
+</style>

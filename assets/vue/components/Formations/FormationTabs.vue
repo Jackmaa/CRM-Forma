@@ -1,16 +1,20 @@
 <template>
-    <section class="p-6 bg-gray-50 h-full overflow-auto">
-        <!-- Onglets -->
-        <div class="flex border-b mb-6">
+    <section class="p-6 bg-base-200 h-full overflow-auto">
+        <!-- Onglets DaisyUI -->
+        <div class="tabs mb-6">
             <button
+                type="button"
                 @click="tab = 'formations'"
-                :class="tab === 'formations' ? activeClass : inactiveClass"
+                class="tab tab-bordered"
+                :class="{ 'tab-active': tab === 'formations' }"
             >
                 Formations
             </button>
             <button
+                type="button"
                 @click="tab = 'sessions'"
-                :class="tab === 'sessions' ? activeClass : inactiveClass"
+                class="tab tab-bordered"
+                :class="{ 'tab-active': tab === 'sessions' }"
             >
                 Sessions
             </button>
@@ -40,11 +44,7 @@ import SessionList from "../Session/SessionList.vue";
 // État de l’onglet actif
 const tab = ref("formations");
 
-// Classes Tailwind pour onglets
-const activeClass = "px-4 py-2 border-b-2 border-indigo-600 text-indigo-600";
-const inactiveClass = "px-4 py-2 text-gray-600 hover:text-indigo-600";
-
-// On récupère les routes injectées par Twig
+// Routes injectées par Twig (window.APP_ROUTES)
 const routes = {
     formationApi: window.APP_ROUTES.formationApi,
     formationNew: window.APP_ROUTES.formationNew,
@@ -52,3 +52,7 @@ const routes = {
     sessionNew: window.APP_ROUTES.sessionNew,
 };
 </script>
+
+<style scoped>
+/* DaisyUI tabs gèrent déjà le style et la transition */
+</style>

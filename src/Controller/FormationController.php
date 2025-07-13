@@ -1,5 +1,4 @@
 <?php
-// src/Controller/FormationController.php
 namespace App\Controller;
 
 use App\Entity\Formation;
@@ -13,12 +12,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/formation', name: 'formation_')]
-#[IsGranted('ROLE_USER')]
 class FormationController extends AbstractController {
     /**
-     * GET  /formation
+     * Liste toutes les formations du centre de l’utilisateur.
      */
     #[Route('', name: 'index', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function index(EntityManagerInterface $em): Response {
         $repo       = $em->getRepository(Formation::class);
         $formations = $repo->findBy([
@@ -31,9 +30,10 @@ class FormationController extends AbstractController {
     }
 
     /**
-     * GET  /formation/api
+     * Même liste que index(), format JSON pour API.
      */
     #[Route('/api', name: 'api', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function api(EntityManagerInterface $em): JsonResponse {
         $repo       = $em->getRepository(Formation::class);
         $formations = $repo->findBy([
@@ -50,14 +50,15 @@ class FormationController extends AbstractController {
     }
 
     /**
-     * GET|POST  /formation/new
+     * Création d’une nouvelle formation.
      */
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN_CENTRE')]
     public function new (Request $request, EntityManagerInterface $em): Response {
         $formation = new Formation();
-        $formation->setCentre($this->getUser()->getCentre());
-        $formation->setResponsable($this->getUser());
+        $formation
+            ->setCentre($this->getUser()->getCentre())
+            ->setResponsable($this->getUser());
 
         $form = $this->createForm(FormationType::class, $formation);
         $form->handleRequest($request);
@@ -65,8 +66,8 @@ class FormationController extends AbstractController {
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($formation);
             $em->flush();
-            $this->addFlash('success', 'Formation créée avec succès.');
 
+            $this->addFlash('success', 'Formation créée avec succès.');
             return $this->redirectToRoute('formation_index');
         }
 
@@ -76,12 +77,14 @@ class FormationController extends AbstractController {
     }
 
     /**
-     * GET  /formation/{id}
+     * Affiche le détail d’une formation.
      */
     #[Route('/{id<\d+>}', name: 'show', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function show(Formation $formation): Response {
+        // Vérifie que la formation appartient bien au centre de l’utilisateur
         if ($formation->getCentre() !== $this->getUser()->getCentre()) {
-            throw $this->createAccessDeniedException('Accès refusé.');
+            throw $this->createAccessDeniedException('Accès refusé : formation hors de votre centre.');
         }
 
         return $this->render('formation/show.html.twig', [
@@ -90,17 +93,13 @@ class FormationController extends AbstractController {
     }
 
     /**
-     * GET|PATCH  /formation/{id}/edit
+     * Modification partielle ou affichage du formulaire d’édition.
      */
     #[Route('/{id<\d+>}/edit', name: 'edit', methods: ['GET', 'PATCH'])]
     #[IsGranted('ROLE_ADMIN_CENTRE')]
-    public function edit(
-        Request $request,
-        Formation $formation,
-        EntityManagerInterface $em
-    ): Response | JsonResponse {
+    public function edit(Request $request, Formation $formation, EntityManagerInterface $em): Response | JsonResponse {
         if ($formation->getCentre() !== $this->getUser()->getCentre()) {
-            throw $this->createAccessDeniedException('Accès refusé.');
+            throw $this->createAccessDeniedException('Accès refusé : formation hors de votre centre.');
         }
 
         if ($request->isMethod('GET')) {
@@ -110,16 +109,17 @@ class FormationController extends AbstractController {
         }
 
         $data = json_decode($request->getContent(), true);
-        isset($data['titre']) && $formation->setTitre($data['titre']);
-        isset($data['slug']) && $formation->setSlug($data['slug']);
-        isset($data['thematique']) && $formation->setThematique($data['thematique']);
-        isset($data['niveau']) && $formation->setNiveau($data['niveau']);
-        isset($data['duree']) && $formation->setDuree((int) $data['duree']);
-        isset($data['tarif']) && $formation->setTarif($data['tarif']);
-        isset($data['prerequis']) && $formation->setPrerequis($data['prerequis']);
-        isset($data['description']) && $formation->setDescription($data['description']);
-        isset($data['modalites']) && $formation->setModalites($data['modalites']);
-        isset($data['objectifs']) && $formation->setObjectifs($data['objectifs']);
+        // Ne mettez à jour que les champs présents
+        foreach ([
+            'titre', 'slug', 'thematique', 'niveau',
+            'duree', 'tarif', 'prerequis',
+            'description', 'modalites', 'objectifs',
+        ] as $field) {
+            if (isset($data[$field])) {
+                $setter = 'set' . ucfirst($field);
+                $formation->$setter($field === 'duree' ? (int) $data[$field] : $data[$field]);
+            }
+        }
 
         $em->flush();
 
@@ -135,24 +135,26 @@ class FormationController extends AbstractController {
                 'tarif'       => $formation->getTarif(),
                 'prerequis'   => $formation->getPrerequis(),
                 'description' => $formation->getDescription(),
+                'modalites'   => $formation->getModalites(),
+                'objectifs'   => $formation->getObjectifs(),
             ],
         ]);
     }
 
     /**
-     * POST  /formation/{id}/delete
+     * Suppression d’une formation.
      */
     #[Route('/{id<\d+>}/delete', name: 'delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN_CENTRE')]
     public function delete(Request $request, Formation $formation, EntityManagerInterface $em): Response {
         if ($formation->getCentre() !== $this->getUser()->getCentre()) {
-            throw $this->createAccessDeniedException('Accès refusé.');
+            throw $this->createAccessDeniedException('Accès refusé : formation hors de votre centre.');
         }
 
         if ($this->isCsrfTokenValid('delete' . $formation->getId(), $request->request->get('_token'))) {
             $em->remove($formation);
             $em->flush();
-            $this->addFlash('success', 'Formation supprimée.');
+            $this->addFlash('success', 'Formation supprimée avec succès.');
         } else {
             $this->addFlash('error', 'Jeton CSRF invalide.');
         }
@@ -161,12 +163,13 @@ class FormationController extends AbstractController {
     }
 
     /**
-     * GET  /formation/api/{id}
+     * Détail JSON d’une formation.
      */
     #[Route('/api/{id<\d+>}', name: 'api_detail', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function apiDetail(Formation $formation): JsonResponse {
         if ($formation->getCentre() !== $this->getUser()->getCentre()) {
-            throw $this->createAccessDeniedException('Accès refusé.');
+            throw $this->createAccessDeniedException('Accès refusé : formation hors de votre centre.');
         }
 
         return $this->json([

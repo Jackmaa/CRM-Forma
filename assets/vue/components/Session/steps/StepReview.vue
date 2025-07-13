@@ -1,24 +1,42 @@
 <template>
-    <div class="space-y-4">
-        <h3 class="text-lg font-medium">Résumé de la session</h3>
-        <ul class="list-disc list-inside space-y-1">
-            <li><strong>Formation :</strong> {{ formationTitle }}</li>
+    <div class="card bg-base-100 shadow-lg p-6 space-y-4">
+        <h3 class="text-lg font-medium text-base-content">
+            Résumé de la session
+        </h3>
+        <ul
+            class="list-disc list-inside space-y-1 text-base-content opacity-90"
+        >
             <li>
-                <strong>Date de début :</strong> {{ formatDate(dateDebut) }}
+                <span class="font-semibold">Formation :</span>
+                {{ formationTitle }}
             </li>
-            <li><strong>Date de fin :</strong> {{ formatDate(dateFin) }}</li>
-            <li><strong>Formateurs :</strong> {{ selectedFormateurs }}</li>
-            <li><strong>Stagiaires :</strong> {{ selectedParticipants }}</li>
-            <li><strong>Modalité :</strong> {{ modalite }}</li>
-            <li><strong>Lieu :</strong> {{ lieu }}</li>
+            <li>
+                <span class="font-semibold">Date de début :</span>
+                {{ formatDate(dateDebut) }}
+            </li>
+            <li>
+                <span class="font-semibold">Date de fin :</span>
+                {{ formatDate(dateFin) }}
+            </li>
+            <li>
+                <span class="font-semibold">Formateurs :</span>
+                {{ selectedFormateurs }}
+            </li>
+            <li>
+                <span class="font-semibold">Stagiaires :</span>
+                {{ selectedParticipants }}
+            </li>
+            <li>
+                <span class="font-semibold">Modalité :</span> {{ modalite }}
+            </li>
+            <li><span class="font-semibold">Lieu :</span> {{ lieu }}</li>
         </ul>
         <div class="flex flex-wrap gap-2 mt-4">
-            <!-- Exclure la dernière étape (récapitulatif) des boutons de modification -->
             <button
                 v-for="(step, index) in steps.slice(0, -1)"
                 :key="index"
                 @click="editStep(index)"
-                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+                class="btn btn-outline btn-sm"
             >
                 Modifier {{ step.name }}
             </button>
@@ -39,21 +57,20 @@ const props = defineProps({
     lieu: String,
     steps: Array,
 });
-const emit = defineEmits(["update", "edit-step"]);
+const emit = defineEmits(["edit-step"]);
 
 const formationTitle = ref("");
 const formateurs = ref([]);
 const participants = ref([]);
 
-// Fetch labels for formation, formateurs, participants
 onMounted(async () => {
-    // Formation
+    // Récupère le titre de la formation
     const f = await fetch(`/formation/api/${props.formationId}`).then((r) =>
         r.json()
     );
     formationTitle.value = f.title;
 
-    // Formateurs
+    // Récupère les formateurs
     if (props.formateurIds.length) {
         formateurs.value = await Promise.all(
             props.formateurIds.map((id) =>
@@ -61,8 +78,7 @@ onMounted(async () => {
             )
         );
     }
-
-    // Participants
+    // Récupère les participants
     if (props.participantIds.length) {
         participants.value = await Promise.all(
             props.participantIds.map((id) =>
@@ -84,7 +100,6 @@ function formatDate(iso) {
 const selectedFormateurs = computed(() =>
     formateurs.value.map((u) => `${u.prenom} ${u.nom}`).join(", ")
 );
-
 const selectedParticipants = computed(() =>
     participants.value.map((u) => `${u.prenom} ${u.nom}`).join(", ")
 );
@@ -93,3 +108,7 @@ function editStep(index) {
     emit("edit-step", index);
 }
 </script>
+
+<style scoped>
+/* DaisyUI gère le style de base, pas de CSS custom nécessaire */
+</style>

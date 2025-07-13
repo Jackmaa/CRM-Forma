@@ -1,4 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* charge DaisyUI comme plugin Tailwind */
+@plugin "daisyui";
+/* charge ton plugin d’animations */
 @plugin "@midudev/tailwind-animations";

@@ -1,7 +1,7 @@
 <template>
     <aside
         :class="[
-            'shadow flex flex-col justify-between transition-all duration-300 ease-in-out h-screen px-2',
+            'flex flex-col justify-between transition-all duration-300 ease-in-out h-screen px-2 bg-base-200',
             isCollapsed ? 'w-16' : 'w-64',
         ]"
     >
@@ -9,96 +9,114 @@
             <!-- Collapse toggle -->
             <button
                 @click="isCollapsed = !isCollapsed"
-                class="flex items-center justify-center w-full p-2 hover:bg-gray-100"
+                class="btn btn-ghost btn-square w-full mb-4"
             >
                 <ChevronLeft
                     :class="[
-                        'w-5 h-5 transform transition-transform duration-300',
+                        'transition-transform duration-300',
                         isCollapsed ? 'rotate-180' : '',
                     ]"
                 />
             </button>
 
+            <!-- Logo / Title -->
             <h1
-                class="font-bold mb-6 text-lg overflow-hidden whitespace-nowrap transition-opacity duration-300"
+                class="font-bold mb-6 text-lg transition-opacity duration-300 text-base-content"
                 :class="isCollapsed ? 'opacity-0' : 'opacity-100'"
             >
                 CRM Formation
             </h1>
 
-            <nav class="space-y-2">
-                <SidebarLink
-                    icon="Home"
-                    label="Tableau de bord"
-                    :collapsed="isCollapsed"
-                    to="/"
-                />
-                <SidebarLink
-                    icon="BookOpen"
-                    label="Formations"
-                    :collapsed="isCollapsed"
-                    to="/formation"
-                />
-                <SidebarLink
-                    icon="Users"
-                    label="Utilisateurs"
-                    :collapsed="isCollapsed"
-                    to="/user"
-                />
-                <SidebarLink
-                    icon="BarChart2"
-                    label="Rapports"
-                    :collapsed="isCollapsed"
-                    to="/stats"
-                />
-
-                <!-- Lien Paramètres avec badge et coloration conditionnelle -->
-                <SidebarLink
-                    icon="Settings"
-                    label="Paramètres"
-                    :collapsed="isCollapsed"
-                    to="/settings"
-                    :class="paramLinkClass"
-                >
-                    <template #append>
-                        <span
-                            v-if="forcePasswordReset"
-                            class="absolute top-3 right-3 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-semibold text-white bg-red-600 rounded-full"
+            <!-- Main Navigation -->
+            <nav class="menu menu-vertical p-2 gap-2 text-base-content">
+                <ul>
+                    <li>
+                        <SidebarLink
+                            icon="Home"
+                            label="Tableau de bord"
+                            :collapsed="isCollapsed"
+                            to="/"
+                        />
+                    </li>
+                    <li>
+                        <SidebarLink
+                            icon="BookOpen"
+                            label="Formations"
+                            :collapsed="isCollapsed"
+                            to="/formation"
+                        />
+                    </li>
+                    <li>
+                        <SidebarLink
+                            icon="Users"
+                            label="Utilisateurs"
+                            :collapsed="isCollapsed"
+                            to="/user"
+                        />
+                    </li>
+                    <li>
+                        <SidebarLink
+                            icon="BarChart2"
+                            label="Rapports"
+                            :collapsed="isCollapsed"
+                            to="/stats"
+                        />
+                    </li>
+                    <li>
+                        <SidebarLink
+                            icon="Settings"
+                            label="Paramètres"
+                            :collapsed="isCollapsed"
+                            to="/settings"
+                            :class="paramLinkClass"
                         >
-                            1
-                        </span>
-                    </template>
-                </SidebarLink>
+                            <template #append>
+                                <span
+                                    v-if="forcePasswordReset"
+                                    class="badge badge-error badge-sm absolute right-2"
+                                >
+                                    1
+                                </span>
+                            </template>
+                        </SidebarLink>
+                    </li>
+                </ul>
             </nav>
         </div>
 
+        <!-- Logout at bottom -->
         <div class="p-2">
-            <SidebarLink
-                icon="LogOut"
-                label="Déconnexion"
-                :collapsed="isCollapsed"
-                class="text-red-600 hover:bg-red-50 hover:text-red-700"
-                to="/logout"
-            />
+            <ul>
+                <li>
+                    <SidebarLink
+                        icon="LogOut"
+                        label="Déconnexion"
+                        :collapsed="isCollapsed"
+                        to="/logout"
+                        class="text-error hover:bg-base-300"
+                    />
+                </li>
+            </ul>
         </div>
     </aside>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import SidebarLink from "./SidebarLink.vue";
 import { useUserSettings } from "@/composables/useUserSettings.js";
 
 const isCollapsed = ref(false);
-
-// On récupère forcePasswordReset depuis notre composable
 const { forcePasswordReset } = useUserSettings();
 
-// Classe conditionnelle pour le lien Paramètres
 const paramLinkClass = computed(() =>
     forcePasswordReset.value
-        ? "text-red-600 hover:bg-red-50 hover:text-red-700 relative"
-        : "text-gray-600 hover:bg-gray-100"
+        ? "text-error relative"
+        : "text-base-content hover:bg-base-300"
 );
 </script>
+
+<style scoped>
+/* DaisyUI menu handles styling */
+</style>

@@ -1,65 +1,88 @@
 <template>
-    <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700"
-            >Stagiaires</label
-        >
-        <select
-            v-model="local.participantIds"
-            multiple
-            class="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring focus:border-blue-300 h-32"
-        >
-            <option
-                v-for="participant in participants"
-                :key="participant.id"
-                :value="participant.id"
-            >
-                {{
-                    participant.fullname ||
-                    `${participant.prenom} ${participant.nom}`
-                }}
-            </option>
-        </select>
-        <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+    <div class="space-y-4">
+        <!-- Choix de la modalité -->
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text text-base-content">Modalité</span>
+            </label>
+            <div class="flex space-x-6">
+                <label class="label cursor-pointer flex items-center space-x-2">
+                    <input
+                        type="radio"
+                        v-model="local.modalite"
+                        value="présentiel"
+                        class="radio radio-primary"
+                    />
+                    <span class="label-text text-base-content">Présentiel</span>
+                </label>
+                <label class="label cursor-pointer flex items-center space-x-2">
+                    <input
+                        type="radio"
+                        v-model="local.modalite"
+                        value="distanciel"
+                        class="radio radio-primary"
+                    />
+                    <span class="label-text text-base-content">Distanciel</span>
+                </label>
+                <label class="label cursor-pointer flex items-center space-x-2">
+                    <input
+                        type="radio"
+                        v-model="local.modalite"
+                        value="hybride"
+                        class="radio radio-primary"
+                    />
+                    <span class="label-text text-base-content">Hybride</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Saisie du lieu -->
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text text-base-content">Lieu</span>
+            </label>
+            <input
+                v-model="local.lieu"
+                type="text"
+                placeholder="Entrez le lieu de la session"
+                class="input input-bordered w-full"
+            />
+        </div>
+
+        <!-- Message d'erreur -->
+        <p v-if="error" class="text-error mt-1">{{ error }}</p>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from "vue";
+import { reactive, watch, ref } from "vue";
 
 const props = defineProps({
-    participantIds: {
-        type: Array,
-        default: () => [],
-    },
+    modalite: { type: String, default: "présentiel" },
+    lieu: { type: String, default: "" },
 });
 const emit = defineEmits(["update"]);
 
-// State local pour la sélection
-const local = reactive({
-    participantIds: [...props.participantIds],
-});
-
-// Liste des stagiaires disponibles
-const participants = ref([]);
+// état local pour binding
+const local = reactive({ modalite: props.modalite, lieu: props.lieu });
 const error = ref("");
 
-onMounted(async () => {
-    try {
-        const res = await fetch("/api/users?role=STAGIAIRE");
-        if (!res.ok) throw new Error("Échec du chargement des stagiaires");
-        const data = await res.json();
-        participants.value = data;
-    } catch (e) {
-        error.value = e.message;
-    }
-});
-
-// Émettre les IDs sélectionnés au parent
+// watch pour émettre et valider
 watch(
-    () => local.participantIds,
-    (val) => {
-        emit("update", { participantIds: val });
+    () => [local.modalite, local.lieu],
+    ([mod, lieu]) => {
+        error.value = "";
+        if (!mod) {
+            error.value = "Veuillez sélectionner une modalité.";
+        } else if (!lieu.trim()) {
+            error.value = "Le lieu est requis.";
+        }
+        emit("update", { modalite: mod, lieu });
     },
-    { deep: true }
+    { immediate: true }
 );
 </script>
+
+<style scoped>
+/* DaisyUI gère les styles des form-control, label, input et radio */
+</style>

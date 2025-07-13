@@ -1,21 +1,23 @@
 <template>
     <div
-        class="bg-white p-4 rounded shadow hover:shadow-lg transition flex items-center gap-4"
+        class="card bg-base-100 shadow-lg hover:shadow-xl transition p-4 flex items-center gap-4"
     >
         <!-- Initiales -->
-        <div
-            class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-lg font-bold"
-        >
-            {{ initials }}
+        <div class="avatar">
+            <div
+                class="w-12 h-12 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold"
+            >
+                {{ initials }}
+            </div>
         </div>
         <!-- Infos -->
         <div class="flex-1">
-            <h3 class="text-lg font-medium">{{ name }}</h3>
-            <p class="text-sm text-gray-600">{{ email }}</p>
+            <h3 class="text-lg font-medium text-base-content">{{ name }}</h3>
+            <p class="text-sm text-base-content opacity-70">{{ email }}</p>
         </div>
         <button
             @click="$emit('view', id)"
-            class="text-green-600 hover:underline text-sm"
+            class="btn btn-ghost btn-sm text-success"
         >
             Voir
         </button>
@@ -29,5 +31,11 @@ const props = defineProps({
         required: true,
     },
 });
+
+// Déstructuration des props utilisateur
 const { id, name, email, initials } = props.user;
 </script>
+
+<style scoped>
+/* DaisyUI gère les styles, pas de CSS custom nécessaire */
+</style>

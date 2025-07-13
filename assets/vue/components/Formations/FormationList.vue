@@ -1,10 +1,10 @@
 <template>
-    <section class="p-6 bg-gray-50 h-full overflow-auto">
+    <section class="p-6 bg-base-200 h-full overflow-auto">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-semibold">Formations</h2>
+            <h2 class="text-2xl font-semibold text-base-content">Formations</h2>
             <button
                 @click="goToNewFormation"
-                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
+                class="btn btn-primary btn-sm flex items-center"
             >
                 <Plus class="w-5 h-5 mr-2" />
                 Ajouter une formation
@@ -16,7 +16,7 @@
                 v-model="searchTerm"
                 type="text"
                 placeholder="Rechercher une formation..."
-                class="w-full max-w-md px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-300"
+                class="input input-bordered w-full max-w-md"
             />
         </div>
 
@@ -24,63 +24,62 @@
             <div
                 v-for="formation in filteredFormations"
                 :key="formation.id"
-                class="bg-white p-4 rounded shadow hover:shadow-lg transition relative"
+                class="card bg-base-100 shadow-lg hover:shadow-xl transition relative p-4"
             >
                 <template v-if="editingId === formation.id">
-                    <!-- Mode édition rapide -->
                     <input
                         v-model="formation.titre"
-                        class="w-full border rounded px-2 py-1 mb-2"
+                        class="input input-bordered w-full mb-2"
                     />
                     <textarea
                         v-model="formation.description"
                         rows="3"
-                        class="w-full border rounded px-2 py-1 mb-2"
+                        class="textarea textarea-bordered w-full mb-2"
                     ></textarea>
                     <div class="flex items-center space-x-2">
                         <button
                             @click="saveFormation(formation)"
                             :disabled="saving"
-                            class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                            class="btn btn-success btn-sm"
                         >
                             <span v-if="saving">Sauvegarde...</span>
                             <span v-else>Enregistrer</span>
                         </button>
                         <button
                             @click="cancelEdit"
-                            class="px-3 py-1 bg-gray-300 text-gray-800 rounded"
+                            class="btn btn-outline btn-sm"
                         >
                             Annuler
                         </button>
                     </div>
-                    <div
+                    <p
                         v-if="successId === formation.id"
-                        class="text-green-600 mt-1"
+                        class="text-success mt-1"
                     >
-                        Sauvegardé !
-                    </div>
-                    <div v-if="error" class="text-red-600 mt-1">
+                        Sauvegardé !
+                    </p>
+                    <p v-if="error" class="text-error mt-1">
                         {{ error }}
-                    </div>
+                    </p>
                 </template>
+
                 <template v-else>
-                    <!-- Mode affichage -->
-                    <h3 class="text-lg font-semibold mb-2">
+                    <h3 class="text-lg font-semibold text-base-content mb-2">
                         {{ formation.titre }}
                     </h3>
-                    <p class="text-gray-600 text-sm mb-4">
+                    <p class="text-base-content opacity-70 text-sm mb-4">
                         {{ formation.description }}
                     </p>
                     <div class="flex justify-between">
                         <a
                             :href="getShowUrl(formation.id)"
-                            class="text-blue-600 hover:underline text-sm"
+                            class="link link-primary text-sm"
                         >
                             Voir détails
                         </a>
                         <button
                             @click="editFormation(formation)"
-                            class="text-gray-500 hover:text-gray-700 text-sm"
+                            class="btn btn-ghost btn-sm"
                         >
                             Modifier
                         </button>
@@ -174,3 +173,7 @@ onMounted(async () => {
     }));
 });
 </script>
+
+<style scoped>
+/* Pas de CSS custom, DaisyUI gère le style et la responsivité */
+</style>

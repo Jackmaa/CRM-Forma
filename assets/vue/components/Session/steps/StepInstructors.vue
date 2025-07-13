@@ -1,12 +1,12 @@
 <template>
-    <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700"
-            >Formateurs</label
-        >
+    <div class="form-control w-full">
+        <label class="label">
+            <span class="label-text text-base-content">Formateurs</span>
+        </label>
         <select
             v-model="local.formateurIds"
             multiple
-            class="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring focus:border-blue-300 h-32"
+            class="select select-bordered w-full h-32"
         >
             <option
                 v-for="instructor in instructors"
@@ -19,7 +19,7 @@
                 }}
             </option>
         </select>
-        <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+        <p v-if="error" class="text-error mt-1">{{ error }}</p>
     </div>
 </template>
 
@@ -35,9 +35,7 @@ const props = defineProps({
 const emit = defineEmits(["update"]);
 
 // Local copy of the selected IDs
-const local = reactive({
-    formateurIds: [...props.formateurIds],
-});
+const local = reactive({ formateurIds: [...props.formateurIds] });
 
 // List of available instructors
 const instructors = ref([]);
@@ -47,19 +45,20 @@ onMounted(async () => {
     try {
         const res = await fetch("/api/users?role=FORMATEUR");
         if (!res.ok) throw new Error("Échec du chargement des formateurs");
-        const data = await res.json();
-        instructors.value = data;
+        instructors.value = await res.json();
     } catch (e) {
         error.value = e.message;
     }
 });
 
-// Émmettre les modifications vers le parent
+// Émettre les modifications vers le parent
 watch(
     () => local.formateurIds,
-    (val) => {
-        emit("update", { formateurIds: val });
-    },
+    (val) => emit("update", { formateurIds: val }),
     { deep: true, immediate: true }
 );
 </script>
+
+<style scoped>
+/* DaisyUI gère le style, pas de CSS custom nécessaire */
+</style>

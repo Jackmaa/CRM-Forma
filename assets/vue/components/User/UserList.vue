@@ -1,19 +1,17 @@
 <template>
-    <section class="p-6 bg-gray-50 h-full overflow-auto">
+    <section class="p-6 bg-base-200 h-full overflow-auto">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-semibold">Utilisateurs</h2>
-
+            <h2 class="text-2xl font-semibold text-base-content">
+                Utilisateurs
+            </h2>
             <div class="flex items-center space-x-2">
-                <!-- Import dropdown -->
-                <div class="relative inline-block text-left">
-                    <button
-                        @click="dropdownOpen = !dropdownOpen"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
-                    >
+                <!-- Import dropdown DaisyUI -->
+                <div class="dropdown">
+                    <label tabindex="0" class="btn btn-primary btn-sm gap-2">
                         📥 Importer
                         <svg
-                            class="ml-2 w-4 h-4"
+                            class="w-4 h-4 ml-1"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -25,55 +23,53 @@
                                 d="M19 9l-7 7-7-7"
                             />
                         </svg>
-                    </button>
-                    <div
-                        v-if="dropdownOpen"
-                        class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg z-50"
+                    </label>
+                    <ul
+                        tabindex="0"
+                        class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40"
                     >
-                        <ImportOption
-                            label="📄 CSV"
-                            accept=".csv"
-                            @change="onCSVImport"
-                            inputId="csv-upload"
-                        />
-                        <ImportOption
-                            label="📇 vCard (.vcf)"
-                            accept=".vcf"
-                            @change="onVCFImport"
-                            inputId="vcf-upload"
-                        />
-                    </div>
+                        <li>
+                            <ImportOption
+                                label="📄 CSV"
+                                accept=".csv"
+                                @change="onCSVImport"
+                                inputId="csv-upload"
+                            />
+                        </li>
+                        <li>
+                            <ImportOption
+                                label="📇 vCard (.vcf)"
+                                accept=".vcf"
+                                @change="onVCFImport"
+                                inputId="vcf-upload"
+                            />
+                        </li>
+                    </ul>
                 </div>
-
                 <!-- Ajouter -->
                 <button
                     @click="goToNewUser"
-                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 transition"
+                    class="btn btn-success btn-sm flex items-center gap-2"
                 >
-                    <Plus class="w-5 h-5 mr-2" />
-                    Ajouter un utilisateur
+                    <Plus class="w-5 h-5" />
+                    Ajouter
                 </button>
             </div>
         </div>
 
-        <!-- Search -->
-        <div class="mb-4">
+        <!-- Search & Filter -->
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
             <input
                 v-model="searchTerm"
                 type="text"
-                placeholder="Rechercher un utilisateur..."
-                class="w-full max-w-md px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-300"
+                placeholder="Rechercher..."
+                class="input input-bordered w-full md:w-1/2"
             />
-        </div>
-        <!-- Filtre par rôle -->
-        <div class="mb-4 flex items-center space-x-2">
-            <label for="role-filter" class="font-medium">Rôle :</label>
             <select
-                id="role-filter"
                 v-model="roleFilter"
-                class="border px-2 py-1 rounded"
+                class="select select-bordered w-full md:w-1/4"
             >
-                <option value="">Tous</option>
+                <option value="">Tous rôles</option>
                 <option
                     v-for="opt in roleOptions"
                     :key="opt.value"
@@ -85,33 +81,32 @@
         </div>
 
         <!-- User cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             <div
                 v-for="user in filteredUsers"
                 :key="user.id"
-                class="bg-white p-4 rounded shadow hover:shadow-lg transition relative"
+                class="card bg-base-100 shadow hover:shadow-lg transition p-4 relative"
             >
                 <template v-if="editingId === user.id">
-                    <!-- Mode édition rapide -->
                     <div class="space-y-2">
                         <input
                             v-model="user.prenom"
                             placeholder="Prénom"
-                            class="w-full border rounded px-2 py-1"
+                            class="input input-bordered w-full"
                         />
                         <input
                             v-model="user.nom"
                             placeholder="Nom"
-                            class="w-full border rounded px-2 py-1"
+                            class="input input-bordered w-full"
                         />
                         <input
                             v-model="user.email"
                             placeholder="Email"
-                            class="w-full border rounded px-2 py-1"
+                            class="input input-bordered w-full"
                         />
                         <select
                             v-model="user.role"
-                            class="w-full border rounded px-2 py-1"
+                            class="select select-bordered w-full"
                         >
                             <option
                                 v-for="opt in roleOptions"
@@ -121,68 +116,61 @@
                                 {{ opt.label }}
                             </option>
                         </select>
-                        <label class="inline-flex items-center">
+                        <label class="label cursor-pointer">
+                            <span class="label-text">Compte actif</span>
                             <input
                                 type="checkbox"
                                 v-model="user.isActive"
-                                class="form-checkbox h-5 w-5 text-blue-600"
+                                class="toggle toggle-primary"
                             />
-                            <span class="ml-2">Compte actif</span>
                         </label>
                     </div>
-                    <div class="flex items-center space-x-2 mt-3">
+                    <div class="flex justify-end space-x-2 mt-4">
                         <button
                             @click="saveUser(user)"
                             :disabled="saving"
-                            class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                            class="btn btn-success btn-sm"
                         >
-                            <span v-if="saving">Sauvegarde...</span>
-                            <span v-else>Enregistrer</span>
+                            {{ saving ? "Sauvegarde..." : "Enregistrer" }}
                         </button>
                         <button
                             @click="cancelEdit"
-                            class="px-3 py-1 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                            class="btn btn-ghost btn-sm"
                         >
                             Annuler
                         </button>
                     </div>
-                    <div
-                        v-if="successId === user.id"
-                        class="text-green-600 mt-1"
-                    >
+                    <p v-if="successId === user.id" class="text-success mt-2">
                         Sauvegardé !
-                    </div>
-                    <div v-if="error" class="text-red-600 mt-1">
-                        {{ error }}
-                    </div>
+                    </p>
+                    <p v-if="error" class="text-error mt-2">{{ error }}</p>
                 </template>
-
                 <template v-else>
-                    <!-- Mode affichage -->
-                    <h3 class="text-lg font-semibold mb-2">
+                    <h3 class="text-lg font-semibold text-base-content mb-1">
                         {{ user.prenom }} {{ user.nom }}
                     </h3>
-                    <p class="text-gray-600 text-sm mb-1">{{ user.email }}</p>
-                    <p class="text-gray-600 text-sm mb-1">
+                    <p class="text-sm text-base-content opacity-70">
+                        {{ user.email }}
+                    </p>
+                    <p class="text-sm text-base-content opacity-70">
                         Rôle:
                         {{
                             roleOptions.find((r) => r.value === user.role)
                                 ?.label || user.role
                         }}
                     </p>
-                    <p class="text-gray-600 text-sm">
+                    <p class="text-sm text-base-content opacity-70">
                         Actif: {{ user.isActive ? "Oui" : "Non" }}
                     </p>
                     <div class="flex justify-between mt-4">
                         <a
                             :href="getShowUrl(user.id)"
-                            class="text-blue-600 hover:underline text-sm"
+                            class="link link-primary text-sm"
+                            >Voir détails</a
                         >
-                            Voir détails
-                        </a>
                         <button
                             @click="editUser(user)"
-                            class="text-gray-500 hover:text-gray-700 text-sm"
+                            class="btn btn-ghost btn-sm"
                         >
                             Modifier
                         </button>
@@ -199,7 +187,7 @@ import Papa from "papaparse";
 import { Plus } from "lucide-vue-next";
 import ImportOption from "./ImportOption.vue";
 
-// Routes injectées via Twig ou fallback
+// Routes
 const userNewUrl = window.APP_ROUTES?.userNew || "/user/new";
 const userShowTemplate = window.APP_ROUTES?.userShow || "/user/ID_PLACEHOLDER";
 const userApiList = window.APP_ROUTES?.userApiList || "/api/users";
@@ -209,26 +197,23 @@ const importEndpoint = window.APP_ROUTES?.userImport || "/api/import/users";
 
 const users = ref([]);
 const searchTerm = ref("");
+const roleFilter = ref("");
 const editingId = ref(null);
 const saving = ref(false);
 const error = ref("");
 const successId = ref(null);
-const dropdownOpen = ref(false);
-const roleFilter = ref("");
 
 const filteredUsers = computed(() => {
     const term = searchTerm.value.toLowerCase();
     return users.value.filter((u) => {
-        const matchesSearch =
-            u.prenom.toLowerCase().includes(term) ||
-            u.nom.toLowerCase().includes(term) ||
-            u.email.toLowerCase().includes(term);
-        const matchesRole = !roleFilter.value || u.role === roleFilter.value;
-        return matchesSearch && matchesRole;
+        const matchSearch = [u.prenom, u.nom, u.email].some((field) =>
+            field.toLowerCase().includes(term)
+        );
+        const matchRole = !roleFilter.value || u.role === roleFilter.value;
+        return matchSearch && matchRole;
     });
 });
 
-// 1) Mapping de l'Enum UserRole => Label humain
 const roleOptions = [
     { value: "ADMIN_CENTRE", label: "Administrateur Centre" },
     { value: "FORMATEUR", label: "Formateur" },
@@ -240,7 +225,7 @@ function getShowUrl(id) {
     return userShowTemplate.replace("ID_PLACEHOLDER", id);
 }
 function goToNewUser() {
-    window.location.assign(userNewUrl);
+    window.location.href = userNewUrl;
 }
 function editUser(u) {
     editingId.value = u.id;
@@ -250,7 +235,6 @@ function editUser(u) {
 function cancelEdit() {
     editingId.value = null;
     error.value = "";
-    successId.value = null;
 }
 
 async function saveUser(u) {
@@ -272,8 +256,8 @@ async function saveUser(u) {
         if (!res.ok) throw new Error("Erreur lors de la sauvegarde");
         successId.value = u.id;
         editingId.value = null;
-    } catch (err) {
-        error.value = err.message;
+    } catch (e) {
+        error.value = e.message;
     } finally {
         saving.value = false;
     }
@@ -299,9 +283,7 @@ function parseVCF(raw) {
                         email = line.split(":").pop().trim();
                     }
                 });
-            if (nom && prenom && email) {
-                contacts.push({ nom, prenom, email });
-            }
+            if (nom && prenom && email) contacts.push({ nom, prenom, email });
         });
     return contacts;
 }
@@ -311,10 +293,10 @@ async function importUsers(payload) {
         const res = await fetch(importEndpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ users: payload }),
         });
         const { users: imported } = await res.json();
-        imported.forEach((u) => {
+        imported.forEach((u) =>
             users.value.push({
                 id: u.id,
                 prenom: u.prenom,
@@ -322,12 +304,10 @@ async function importUsers(payload) {
                 email: u.email,
                 role: u.role,
                 isActive: u.isActive,
-            });
-        });
-    } catch (err) {
-        console.error("Erreur import :", err);
-    } finally {
-        dropdownOpen.value = false;
+            })
+        );
+    } catch (e) {
+        console.error("Erreur import :", e);
     }
 }
 
@@ -342,7 +322,6 @@ function onCSVImport(file) {
         },
     });
 }
-
 function onVCFImport(file) {
     if (!file) return;
     const reader = new FileReader();
@@ -362,8 +341,12 @@ onMounted(async () => {
             role: u.role,
             isActive: u.isActive,
         }));
-    } catch (err) {
-        console.error("Erreur chargement utilisateurs", err);
+    } catch (e) {
+        console.error("Erreur chargement utilisateurs", e);
     }
 });
 </script>
+
+<style scoped>
+/* DaisyUI gère les styles, pas de CSS custom nécessaire */
+</style>

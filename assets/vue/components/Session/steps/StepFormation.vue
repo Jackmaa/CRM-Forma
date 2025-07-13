@@ -1,9 +1,13 @@
 <template>
-    <div>
-        <label class="block mb-1 font-medium">Choisir la formation</label>
+    <div class="form-control w-full">
+        <label class="label">
+            <span class="label-text text-base-content"
+                >Choisir la formation</span
+            >
+        </label>
         <select
             v-model="local.formationId"
-            class="w-full border rounded px-2 py-1 text-black"
+            class="select select-bordered w-full"
         >
             <option :value="null" disabled>-- Sélectionnez --</option>
             <option v-for="f in formations" :key="f.id" :value="f.id">
@@ -14,24 +18,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, toRefs } from "vue";
+import { ref, onMounted, watch } from "vue";
 
-const props = defineProps({
-    formationId: Number,
-});
+const props = defineProps({ formationId: Number });
 const emit = defineEmits(["update"]);
 
+// local state pour v-model
 const local = ref({ formationId: props.formationId });
 const formations = ref([]);
 
+// Chargement des données
 onMounted(async () => {
-    formations.value = await fetch("/formation/api").then((r) => r.json());
+    try {
+        formations.value = await fetch("/formation/api").then((r) => r.json());
+    } catch {
+        formations.value = [];
+    }
 });
 
-// Émettre les modifications vers le parent
+// Émettre l’update au parent
 watch(
-    () => local.value,
-    (val) => emit("update", { formationId: val.formationId }),
-    { deep: true, immediate: true }
+    () => local.value.formationId,
+    (val) => emit("update", { formationId: val }),
+    { immediate: true }
 );
 </script>
+
+<style scoped>
+/* DaisyUI gère le style des sélecteurs et labels */
+</style>

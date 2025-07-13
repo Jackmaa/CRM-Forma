@@ -1,37 +1,28 @@
 <template>
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Boutons principaux -->
+        <button class="btn btn-outline">+ Nouveau devis</button>
         <button
-            class="border-2 border-dashed border-gray-300 p-4 rounded hover:bg-gray-50 transition"
-        >
-            + Nouveau devis
-        </button>
-
-        <button
-            class="border-2 border-dashed border-gray-300 p-4 rounded hover:bg-gray-50 transition flex items-center justify-center"
             @click="openWizard"
+            class="btn btn-outline flex items-center justify-center"
         >
-            📅 Planifier formation
+            <span class="mr-2">📅</span>Planifier formation
         </button>
 
-        <!-- Modal du wizard -->
-        <transition name="fade">
-            <div
-                v-if="showWizard"
-                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            >
-                <div
-                    class="bg-white rounded-lg shadow-xl w-11/12 md:w-3/4 lg:w-1/2 p-6 relative"
+        <!-- Modal DaisyUI -->
+        <div class="modal" :class="{ 'modal-open': showWizard }">
+            <div class="modal-box bg-base-100 text-base-content relative">
+                <!-- Bouton de fermeture -->
+                <button
+                    @click="closeWizard"
+                    class="btn btn-sm btn-circle absolute right-2 top-2"
                 >
-                    <button
-                        class="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-                        @click="closeWizard"
-                    >
-                        ✕
-                    </button>
-                    <SessionWizard @close="closeWizard" />
-                </div>
+                    ✕
+                </button>
+                <!-- Contenu du wizard -->
+                <SessionWizard @close="closeWizard" />
             </div>
-        </transition>
+        </div>
     </div>
 </template>
 
@@ -51,12 +42,5 @@ function closeWizard() {
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.2s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
+/* DaisyUI modal inclut déjà l'overlay et la transition */
 </style>

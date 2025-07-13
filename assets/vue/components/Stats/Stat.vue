@@ -1,23 +1,27 @@
 <template>
-    <section class="p-6 bg-gray-50 h-full overflow-y-auto overflow-x-hidden">
+    <section class="p-6 bg-base-200 h-full overflow-y-auto">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-3xl font-semibold">Statistiques de gestion</h2>
+            <h2 class="text-3xl font-semibold text-base-content">
+                Statistiques de gestion
+            </h2>
         </div>
 
-        <!-- KPI Cards -->
+        <!-- KPI Cards DaisyUI -->
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div
                 v-for="card in kpis"
                 :key="card.label"
-                class="bg-white p-5 rounded-lg shadow hover:shadow-lg transition flex items-center space-x-4"
+                class="card bg-base-100 shadow-lg hover:shadow-xl transition p-5 flex items-center space-x-4"
             >
-                <component :is="card.icon" class="w-8 h-8 text-indigo-500" />
+                <component :is="card.icon" class="w-8 h-8 text-primary" />
                 <div>
-                    <p class="text-xs text-gray-400 uppercase">
+                    <p class="text-xs uppercase text-base-content opacity-60">
                         {{ card.label }}
                     </p>
-                    <p class="text-3xl font-bold">{{ card.value }}</p>
+                    <p class="text-3xl font-bold text-base-content">
+                        {{ card.value }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -27,15 +31,20 @@
 <script setup>
 import { reactive, onMounted } from "vue";
 import {
-    UsersIcon as Users,
-    BookOpenIcon as BookOpen,
-    ActivityIcon as Activity,
+    Users as UsersIcon,
+    BookOpen as BookOpenIcon,
+    Activity as ActivityIcon,
 } from "lucide-vue-next";
 
 const kpis = reactive([
-    { label: "Utilisateurs", key: "users", icon: Users, value: "…" },
-    { label: "Formations", key: "formations", icon: BookOpen, value: "…" },
-    { label: "Sessions actives", key: "sessions", icon: Activity, value: "…" },
+    { label: "Utilisateurs", key: "users", icon: UsersIcon, value: "…" },
+    { label: "Formations", key: "formations", icon: BookOpenIcon, value: "…" },
+    {
+        label: "Sessions actives",
+        key: "sessions",
+        icon: ActivityIcon,
+        value: "…",
+    },
 ]);
 
 async function loadKpis() {
@@ -49,3 +58,7 @@ async function loadKpis() {
 
 onMounted(loadKpis);
 </script>
+
+<style scoped>
+/* DaisyUI gère le style, pas de CSS custom nécessaire */
+</style>

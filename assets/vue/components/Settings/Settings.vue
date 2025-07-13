@@ -1,147 +1,151 @@
 <template>
-    <section class="p-6 bg-gray-100 h-full overflow-auto">
-        <h2 class="text-3xl font-bold mb-6">Paramètres du compte</h2>
+    <section class="p-6 bg-base-200 h-full overflow-auto">
+        <h2 class="text-3xl font-bold text-base-content mb-6">
+            Paramètres du compte
+        </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Profil Card -->
-            <div class="col-span-2 bg-white rounded-lg shadow p-6 space-y-4">
-                <div class="flex items-center mb-4">
-                    <UserIcon class="w-6 h-6 text-blue-600 mr-2" />
-                    <h3 class="text-xl font-semibold">Profil</h3>
-                </div>
+        <!-- Tabs Navigation -->
+        <div class="tabs mb-4">
+            <button
+                :class="[
+                    'tab tab-lifted',
+                    activeTab === 'profil' ? 'tab-active' : '',
+                ]"
+                @click="activeTab = 'profil'"
+            >
+                Profil
+            </button>
+            <button
+                :class="[
+                    'tab tab-lifted',
+                    activeTab === 'securite' ? 'tab-active' : '',
+                ]"
+                @click="activeTab = 'securite'"
+            >
+                Sécurité
+            </button>
+            <button
+                :class="[
+                    'tab tab-lifted',
+                    activeTab === 'notifications' ? 'tab-active' : '',
+                ]"
+                @click="activeTab = 'notifications'"
+            >
+                Notifications & Apparence
+            </button>
+        </div>
+
+        <form @submit.prevent="saveSettings" class="space-y-6">
+            <!-- Profil -->
+            <div v-show="activeTab === 'profil'">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700"
-                            >Nom d’utilisateur</label
-                        >
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Nom d’utilisateur</span>
+                        </label>
                         <input
                             v-model="settings.username"
                             type="text"
-                            class="mt-1 w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            placeholder="Entrez votre nom d’utilisateur"
+                            class="input input-bordered w-full"
+                            required
                         />
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700"
-                            >Email</label
-                        >
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Email</span>
+                        </label>
                         <input
                             v-model="settings.email"
                             type="email"
-                            class="mt-1 w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            placeholder="exemple@domaine.com"
+                            class="input input-bordered w-full"
+                            required
                         />
                     </div>
                 </div>
             </div>
 
-            <!-- Security Card -->
-            <div class="bg-white rounded-lg shadow p-6 space-y-4">
-                <div class="flex items-center mb-4">
-                    <LockIcon class="w-6 h-6 text-red-600 mr-2" />
-                    <h3 class="text-xl font-semibold">Sécurité</h3>
+            <!-- Sécurité -->
+            <div v-show="activeTab === 'securite'">
+                <div
+                    v-if="settings.forcePasswordReset"
+                    class="alert alert-warning"
+                >
+                    Vous devez définir un nouveau mot de passe.
                 </div>
-                <div class="space-y-4">
-                    <div
-                        v-if="settings.forcePasswordReset"
-                        class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded"
-                    >
-                        Vous devez changer votre mot de passe avant de
-                        continuer.
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700"
-                            >Nouveau mot de passe</label
-                        >
-                        <input
-                            v-model="settings.password"
-                            type="password"
-                            class="mt-1 w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-400"
-                            :disabled="
-                                settings.forcePasswordReset &&
-                                !settings.password
-                            "
-                        />
-                    </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Nouveau mot de passe</span>
+                    </label>
+                    <input
+                        v-model="settings.password"
+                        type="password"
+                        placeholder="••••••••"
+                        class="input input-bordered w-full"
+                        :required="settings.forcePasswordReset"
+                    />
                 </div>
             </div>
 
-            <!-- Notifications & Theme Card -->
-            <div class="bg-white rounded-lg shadow p-6 space-y-6">
-                <!-- Notifications -->
-                <div>
-                    <div class="flex items-center mb-3">
-                        <BellIcon class="w-6 h-6 text-green-600 mr-2" />
-                        <h3 class="text-lg font-semibold">Notifications</h3>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="flex items-center">
+            <!-- Notifications & Apparence -->
+            <div v-show="activeTab === 'notifications'">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label cursor-pointer">
+                            <span class="label-text">Notifications Email</span>
                             <input
                                 type="checkbox"
                                 v-model="settings.notifications.email"
-                                class="h-5 w-5 text-green-600"
+                                class="toggle toggle-primary"
                             />
-                            <span class="ml-2">Email</span>
                         </label>
-                        <label class="flex items-center">
+                    </div>
+                    <div class="form-control">
+                        <label class="label cursor-pointer">
+                            <span class="label-text">Notifications SMS</span>
                             <input
                                 type="checkbox"
                                 v-model="settings.notifications.sms"
-                                class="h-5 w-5 text-green-600"
+                                class="toggle toggle-primary"
                             />
-                            <span class="ml-2">SMS</span>
                         </label>
                     </div>
                 </div>
-                <!-- Theme -->
-                <div>
-                    <div class="flex items-center mb-3">
-                        <SunIcon class="w-6 h-6 text-yellow-500 mr-2" />
-                        <h3 class="text-lg font-semibold">Apparence</h3>
-                    </div>
-                    <div class="flex items-center space-x-6">
-                        <label class="flex items-center">
-                            <input
-                                type="radio"
-                                value="light"
-                                v-model="settings.theme"
-                                class="h-5 w-5 text-blue-600"
-                            />
-                            <span class="ml-2">Clair</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input
-                                type="radio"
-                                value="dark"
-                                v-model="settings.theme"
-                                class="h-5 w-5 text-blue-600"
-                            />
-                            <span class="ml-2">Sombre</span>
-                        </label>
-                    </div>
+                <div class="divider"></div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Thème de l’application</span>
+                    </label>
+                    <ThemeSwitcher />
                 </div>
             </div>
-        </div>
 
-        <!-- Save Button -->
-        <div class="mt-6 flex justify-end">
-            <button
-                @click="saveSettings"
-                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-                :disabled="settings.forcePasswordReset && !settings.password"
-            >
-                Enregistrer les modifications
-            </button>
-        </div>
+            <!-- Actions -->
+            <div class="flex justify-end items-center space-x-4">
+                <button type="button" class="btn btn-ghost" @click="resetForm">
+                    Annuler
+                </button>
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :class="{ loading: saving }"
+                    :disabled="
+                        saving ||
+                        (settings.forcePasswordReset && !settings.password)
+                    "
+                >
+                    <span v-if="!saving">Enregistrer</span>
+                    <span v-else>Enregistrement...</span>
+                </button>
+            </div>
+        </form>
     </section>
 </template>
 
 <script setup>
-import { reactive, onMounted } from "vue";
-import {
-    User as UserIcon,
-    Lock as LockIcon,
-    Bell as BellIcon,
-    Sun as SunIcon,
-} from "lucide-vue-next";
+import { reactive, ref, onMounted } from "vue";
+import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
 
 const token = localStorage.getItem("auth_token") || "";
 const settings = reactive({
@@ -152,6 +156,8 @@ const settings = reactive({
     theme: "light",
     forcePasswordReset: false,
 });
+const activeTab = ref("profil");
+const saving = ref(false);
 
 onMounted(async () => {
     const res = await fetch("/api/user/settings", {
@@ -160,7 +166,15 @@ onMounted(async () => {
     if (res.ok) Object.assign(settings, await res.json());
 });
 
+function resetForm() {
+    activeTab.value = "profil";
+    settings.password = "";
+    // reload from server
+    onMounted();
+}
+
 async function saveSettings() {
+    saving.value = true;
     const payload = {
         username: settings.username,
         email: settings.email,
@@ -182,12 +196,10 @@ async function saveSettings() {
         }).then((r) => r.json());
         Object.assign(settings, updated);
     }
+    saving.value = false;
 }
 </script>
 
 <style scoped>
-/* Ajoute une légère ombre d’élévation pour les cartes */
-.shadow {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-}
+/* Grâce à DaisyUI */
 </style>

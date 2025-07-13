@@ -1,21 +1,25 @@
 <template>
-    <div class="wizard-container">
-        <!-- Barre de progression -->
-        <div class="flex mb-6">
+    <div
+        class="mx-auto max-w-3xl bg-base-100 shadow-lg rounded-lg p-6 space-y-6"
+    >
+        <!-- Barre de progression DaisyUI -->
+        <div class="steps w-full">
             <div
                 v-for="(step, index) in steps"
                 :key="step.name"
-                class="flex-1 h-1 mx-1 rounded"
-                :class="index <= currentStep ? 'bg-blue-600' : 'bg-gray-200'"
-            ></div>
+                class="step"
+                :class="{ 'step-primary': index <= currentStep }"
+            >
+                {{ step.name }}
+            </div>
         </div>
 
         <!-- Titre d’étape -->
-        <h2 class="text-xl font-semibold mb-4">
+        <h2 class="text-xl font-semibold text-base-content">
             {{ steps[currentStep].name }}
         </h2>
 
-        <!-- Affichage du composant d’étape -->
+        <!-- Composant d’étape dynamique -->
         <component
             :is="steps[currentStep].component"
             v-bind="wizardData"
@@ -25,42 +29,36 @@
             class="mb-6"
         />
 
-        <!-- Navigation -->
+        <!-- Navigation DaisyUI -->
         <div class="flex justify-between">
             <button
                 @click="prev"
                 :disabled="currentStep === 0"
-                class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                class="btn btn-outline"
             >
                 Précédent
             </button>
 
-            <button
-                v-if="!isLast"
-                @click="next"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
+            <button v-if="!isLast" @click="next" class="btn btn-primary">
                 Suivant
             </button>
             <button
                 v-else
                 @click="submit"
                 :disabled="submitting"
-                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                class="btn btn-success"
             >
                 <span v-if="submitting">Envoi…</span>
                 <span v-else>Terminer</span>
             </button>
         </div>
 
-        <p v-if="error" class="mt-4 text-red-600">{{ error }}</p>
+        <p v-if="error" class="text-error mt-4">{{ error }}</p>
     </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed } from "vue";
-
-// Import des étapes
 import StepFormation from "./steps/StepFormation.vue";
 import StepSchedule from "./steps/StepSchedule.vue";
 import StepInstructors from "./steps/StepInstructors.vue";
@@ -81,7 +79,6 @@ const currentStep = ref(0);
 const submitting = ref(false);
 const error = ref("");
 
-// Données centralisées du wizard
 const wizardData = reactive({
     formationId: null,
     dateDebut: null,
@@ -103,7 +100,6 @@ function next() {
     error.value = "";
     currentStep.value++;
 }
-
 function prev() {
     currentStep.value--;
 }
@@ -111,8 +107,6 @@ function prev() {
 async function submit() {
     submitting.value = true;
     error.value = "";
-
-    // Construction du payload attendu par SessionType
     const payload = {
         formation: wizardData.formationId,
         formateur_responsable: wizardData.formateurIds[0] || null,
@@ -122,23 +116,17 @@ async function submit() {
         lieu: wizardData.lieu,
         remarques: wizardData.remarques || null,
     };
-
     try {
         const res = await fetch("/session/api", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
         });
-
         const result = await res.json();
-
         if (!res.ok) {
-            console.error("Validation errors:", result);
             error.value = Object.values(result).flat().join("\n");
             return;
         }
-
-        // Redirection vers la page de détail
         window.location.href = `/session/${result.id}`;
     } catch (e) {
         error.value = e.message || "Erreur lors de la création";
@@ -149,11 +137,5 @@ async function submit() {
 </script>
 
 <style scoped>
-.wizard-container {
-    max-width: 720px;
-    margin: auto;
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-}
+/* Toutes les styles sont gérées par DaisyUI */
 </style>
