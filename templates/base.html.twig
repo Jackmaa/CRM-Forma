@@ -12,5 +12,14 @@
   <main class="flex-1 p-4">
     {% block body %}{% endblock %}
   </main>
+{% if app.user %}
+    <script>
+      window.APP_USER_ROLES = {{ app.user.roles|json_encode|raw }};
+    </script>
+{% else %}
+    <script>
+      window.APP_USER_ROLES = [];
+    </script>
+{% endif %}
 </body>
 </html>

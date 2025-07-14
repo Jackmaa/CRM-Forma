@@ -4,48 +4,86 @@
 {% block title %}Connexion{% endblock %}
 
 {% block body %}
-<div class="min-h-screen flex items-center justify-center bg-gray-100">
-  <div class="max-w-md w-full bg-white p-8 rounded shadow">
-    {% if error %}
-      <div class="mb-4 text-red-600">
-        {{ error.messageKey|trans(error.messageData, 'security') }}
+<div class="min-h-screen grid grid-cols-1 md:grid-cols-2">
+  <!-- Visuel ou message accueil (gauche) -->
+  <div class="hidden md:flex items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-500 p-10">
+    <div class="text-center text-white space-y-4">
+      <h2 class="text-5xl font-bold drop-shadow-lg">Bienvenue</h2>
+      <p class="text-lg opacity-90">Accédez à votre espace de gestion</p>
+    </div>
+  </div>
+
+  <!-- Formulaire (droite) -->
+  <div class="flex items-center justify-center p-8 bg-base-100">
+    <div class="w-full max-w-sm space-y-6">
+      <div class="text-center">
+        <h1 class="text-3xl font-extrabold text-base-content">Se connecter</h1>
       </div>
-    {% endif %}
+      {% if error %}
+        <div class="alert alert-error">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728" />
+          </svg>
+          <span>{{ error.messageKey|trans(error.messageData, 'security') }}</span>
+        </div>
+      {% endif %}
+      <form method="post" action="{{ path('app_login') }}" class="space-y-4">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-    <form method="post" action="{{ path('app_login') }}" class="space-y-6">
-      {# jeton CSRF #}
-      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <div class="form-control">
+          <label for="email" class="label">
+            <span class="label-text text-base-content">Email</span>
+          </label>
+          <div class="input-group">
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autofocus
+              placeholder="exemple@domaine.com"
+              class="input input-bordered w-full"
+            />
+            <span class="bg-indigo-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12h.01M12 8h.01M12 16h.01M8 12h.01" />
+              </svg>
+            </span>
+          </div>
+        </div>
 
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          autofocus
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded focus:ring focus:ring-opacity-50"
-        >
-      </div>
+        <div class="form-control">
+          <label for="password" class="label">
+            <span class="label-text text-base-content">Mot de passe</span>
+          </label>
+          <div class="input-group">
+            <span class="bg-purple-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.657-1.343-3-3-3s-3 1.343-3 3v2h6v-2zM7 13v4m6-4v4M18 11c0-3.866-3.134-7-7-7S4 7.134 4 11v4h14v-4z" />
+              </svg>
+            </span>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              placeholder="Votre mot de passe"
+              class="input input-bordered w-full"
+            />
+          </div>
+        </div>
 
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded focus:ring focus:ring-opacity-50"
-        >
-      </div>
+        <div class="flex items-center justify-between">
+          <label class="label cursor-pointer">
+            <input type="checkbox" name="_remember_me" class="checkbox checkbox-sm checkbox-primary" />
+            <span class="label-text ml-2">Se souvenir de moi</span>
+          </label>
+          <a href="{{ path('app_forgot_password_request') }}" class="text-sm text-primary hover:underline">Mot de passe oublié ?</a>
+        </div>
 
-      <button
-        type="submit"
-        class="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        Se connecter
-      </button>
-    </form>
+        <button type="submit" class="btn btn-primary w-full mt-4">Se connecter</button>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}
