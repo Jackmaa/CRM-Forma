@@ -2,7 +2,7 @@
     <section class="space-y-6">
         <ToastContainer class="fixed top-1 right-1 z-50" />
 
-        <!-- 🚀 Hero Bar -->
+        <!-- Hero Bar -->
         <div
             class="flex flex-col md:flex-row md:justify-between items-start md:items-center bg-base-100 p-4 rounded-lg shadow"
         >
@@ -11,10 +11,16 @@
             </h1>
             <div class="mt-3 md:mt-0 flex gap-2">
                 <template v-if="!editing">
-                    <button @click="startEdit" class="btn btn-outline btn-sm">
+                    <!-- On cache pour les stagiaires -->
+                    <button
+                        v-if="!isStagiaire"
+                        @click="startEdit"
+                        class="btn btn-outline btn-sm"
+                    >
                         ✏️ Éditer
                     </button>
                     <form
+                        v-if="!isStagiaire"
                         :action="deleteUrl"
                         method="post"
                         @submit="confirmDelete"
@@ -281,6 +287,7 @@ export default {
         deleteUrl: { type: String, required: true },
         csrfToken: { type: String, required: true },
         isAdmin: { type: Boolean, default: false },
+        isStagiaire: { type: Boolean, default: false },
     },
     data() {
         return {

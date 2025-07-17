@@ -3,7 +3,12 @@
 {% block body %}
 <div class="flex">
     <main class="flex-1 space-y-6">
-      <div {{ vue_component('Formations/FormationTabs') }}></div>
+      <div {{ vue_component('Formations/FormationTabs', {             
+            apiUrl:      path('formation_api'),
+             newUrl:      path('formation_new'),
+             sessionApi:  path('api_session_list'),
+             sessionNew:  path('session_new'),
+             userRoles:   app.user.roles})  }}></div>
     </main>
 </div>
 

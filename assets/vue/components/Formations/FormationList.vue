@@ -3,6 +3,7 @@
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-semibold text-base-content">Formations</h2>
             <button
+                v-if="!isStagiaire"
                 @click="goToNewFormation"
                 class="btn btn-primary btn-sm flex items-center"
             >
@@ -78,6 +79,7 @@
                             Voir détails
                         </a>
                         <button
+                            v-if="!isStagiaire"
                             @click="editFormation(formation)"
                             class="btn btn-ghost btn-sm"
                         >
@@ -97,6 +99,7 @@ import { Plus } from "lucide-vue-next";
 const props = defineProps({
     apiUrl: { type: String, required: true },
     newUrl: { type: String, required: true },
+    isStagiaire: { type: Boolean, required: true },
 });
 const formationShowTemplate =
     window.APP_ROUTES?.formationShow || "/formation/ID_PLACEHOLDER";
