@@ -6,6 +6,7 @@
                 Mes sessions
             </h2>
             <button
+                v-if="isAdmin"
                 @click="goToNew"
                 class="btn btn-primary btn-sm flex items-center"
             >
@@ -39,13 +40,17 @@
                     {{ formatDate(s.dateFin) }}
                 </p>
                 <p class="text-sm text-base-content opacity-70">
-                    Actif : {{ s.isActive ? "Oui" : "Non" }}
+                    Actif : {{ s.isActive ? "Oui" : "Non" }}
                 </p>
                 <div class="mt-4 flex justify-between">
                     <a :href="showUrl(s.id)" class="link link-primary text-sm"
                         >Voir</a
                     >
-                    <button @click="edit(s.id)" class="btn btn-ghost btn-sm">
+                    <button
+                        v-if="isAdmin"
+                        @click="edit(s.id)"
+                        class="btn btn-ghost btn-sm"
+                    >
                         Modifier
                     </button>
                 </div>
@@ -62,6 +67,9 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { Plus } from "lucide-vue-next";
+import { useAuth } from "@/composables/useAuth";
+
+const { isAdmin } = useAuth();
 
 const props = defineProps({
     apiUrl: { type: String, required: true },

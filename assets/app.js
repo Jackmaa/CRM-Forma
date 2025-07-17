@@ -1,40 +1,42 @@
 // assets/app.js
 
-// 1) Import CSS & Stimulus
+// 1) Vos styles (import statique OK, il ne déclenche pas Stimulus)
 import "./styles/app.css";
-import "./bootstrap.js";
 
-// 2) Démarrage de Stimulus
-import { startStimulusApp } from "@symfony/stimulus-bridge";
-startStimulusApp(
-    require.context(
-        "@symfony/stimulus-bridge/lazy-controller-loader!./controllers",
-        true,
-        /\.[jt]sx?$/
-    )
-);
+// 2) On attend que window.APP_USER_ROLES soit déjà défini dans le <head> Twig
+//    (vous avez bien injecté votre script dans le head avant les tags Encore)
 
-// 3) Setup Vue via Symfony UX Vue
-import { registerVueControllerComponents } from "@symfony/ux-vue";
-import { useTheme } from "./vue/composables/useTheme";
-import ToastContainer from "./vue/components/ToastContainer.vue";
+// 3) Configurez UX-Vue *impérativement* avec require()
+const { registerVueControllerComponents } = require("@symfony/ux-vue");
+const { computed } = require("vue");
+const { useTheme } = require("./vue/composables/useTheme");
+const ToastContainer = require("./vue/components/ToastContainer.vue").default;
 
-// Récupération du thème global
 const { theme, setTheme } = useTheme();
 
 registerVueControllerComponents(
     require.context("./vue/components", true, /\.vue$/),
     (vueApp) => {
-        // Provide global theme functions
+        // → API Thème
         vueApp.provide("theme", theme);
         vueApp.provide("setTheme", setTheme);
-        vueApp.config.globalProperties.$setTheme = setTheme;
 
-        // Provide userRoles extracted from Twig
-        // insère avant build <script>window.APP_USER_ROLES = {{ app.user.roles|json_encode|raw }};</script>
-        vueApp.provide("userRoles", window.APP_USER_ROLES);
-
-        // Register global ToastContainer
+        // → ToastContainer global
         vueApp.component("ToastContainer", ToastContainer);
+
+        // → Permissions
+        const roles = window.APP_USER_ROLES || [];
+        vueApp.provide("userRoles", roles);
+        vueApp.provide(
+            "isStagiaire",
+            computed(() => roles.includes("ROLE_STAGIAIRE"))
+        );
+        vueApp.provide(
+            "isAdmin",
+            computed(() => roles.includes("ROLE_ADMIN_CENTRE"))
+        );
     }
 );
+
+// 4) Enfin, démarrez Stimulus (bootstrap.js contient startStimulusApp)
+require("./bootstrap.js");

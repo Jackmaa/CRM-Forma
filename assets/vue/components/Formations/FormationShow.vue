@@ -11,16 +11,16 @@
             </h1>
             <div class="mt-3 md:mt-0 flex gap-2">
                 <template v-if="!editing">
-                    <!-- On cache pour les stagiaires -->
+                    <!-- Caché pour les stagiaires -->
                     <button
-                        v-if="!isStagiaire"
+                        v-if="isAdmin"
                         @click="startEdit"
                         class="btn btn-outline btn-sm"
                     >
                         ✏️ Éditer
                     </button>
                     <form
-                        v-if="!isStagiaire"
+                        v-if="isAdmin"
                         :action="deleteUrl"
                         method="post"
                         @submit="confirmDelete"
@@ -49,7 +49,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- 📝 Résumé (colonne de gauche) -->
+            <!-- 📝 Résumé -->
             <div class="lg:col-span-1 space-y-4">
                 <SectionCard icon="BookOpen" title="Résumé">
                     <InfoRow label="Thématique" :value="formation.thematique" />
@@ -92,9 +92,8 @@
                 </SectionCard>
             </div>
 
-            <!-- 🖊️ Détail ou Formulaire (colonne de droite) -->
+            <!-- 🖊️ Détail / Formulaire -->
             <div class="lg:col-span-2">
-                <!-- Vue simple -->
                 <template v-if="!editing">
                     <SectionCard
                         icon="Clipboard"
@@ -125,7 +124,6 @@
                     </SectionCard>
                 </template>
 
-                <!-- Formulaire d'édition -->
                 <template v-else>
                     <form @submit.prevent="saveChanges" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,7 +192,6 @@
                             </FormControl>
                         </div>
 
-                        <!-- Modalités dynamiques -->
                         <SectionCard icon="List" title="Modalités pédagogiques">
                             <div class="space-y-2">
                                 <div
@@ -224,7 +221,6 @@
                             </div>
                         </SectionCard>
 
-                        <!-- Objectifs dynamiques -->
                         <SectionCard
                             icon="CheckCircle"
                             title="Objectifs pédagogiques"
@@ -267,101 +263,101 @@
     </section>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import { toast } from "@/composables/useToast";
+import { useAuth } from "@/composables/useAuth";
 import InfoRow from "@/components/InfoRow.vue";
 import SectionCard from "@/components/SectionCard.vue";
 import FormControl from "@/components/FormControl.vue";
 import ToastContainer from "@/components/ToastContainer.vue";
 
-export default {
-    components: {
-        ToastContainer,
-        InfoRow,
-        SectionCard,
-        FormControl,
-    },
-    props: {
-        formation: { type: Object, required: true },
-        saveUrl: { type: String, required: true },
-        deleteUrl: { type: String, required: true },
-        csrfToken: { type: String, required: true },
-        isAdmin: { type: Boolean, default: false },
-        isStagiaire: { type: Boolean, default: false },
-    },
-    data() {
-        return {
-            editing: false,
-            form: { ...this.formation },
-            errors: {},
-            errorGeneral: "",
-            saving: false,
-        };
-    },
-    methods: {
-        startEdit() {
-            this.editing = true;
-            this.errors = {};
-            this.errorGeneral = "";
-        },
-        cancelEdit() {
-            this.editing = false;
-            this.form = { ...this.formation };
-            this.errors = {};
-            this.errorGeneral = "";
-        },
-        addModalite() {
-            this.form.modalites = this.form.modalites || [];
-            this.form.modalites.push("");
-        },
-        removeModalite(i) {
-            this.form.modalites.splice(i, 1);
-        },
-        addObjectif() {
-            this.form.objectifs = this.form.objectifs || [];
-            this.form.objectifs.push("");
-        },
-        removeObjectif(i) {
-            this.form.objectifs.splice(i, 1);
-        },
-        async saveChanges() {
-            this.saving = true;
-            this.errors = {};
-            this.errorGeneral = "";
+const { isAdmin } = useAuth();
 
-            const res = await fetch(this.saveUrl, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(this.form),
-            });
+const props = defineProps({
+    formation: { type: Object, required: true },
+    saveUrl: { type: String, required: true },
+    deleteUrl: { type: String, required: true },
+    csrfToken: { type: String, required: true },
+});
 
-            if (res.ok) {
-                toast.success("Formation mise à jour !");
-                this.editing = false;
-                Object.assign(this.formation, this.form);
-            } else if (res.status === 400) {
-                const json = await res.json();
-                this.errors = json.violations || {};
-                this.errorGeneral = json.message || "";
-                toast.error("Erreur de validation");
-            } else {
-                this.errorGeneral = "Une erreur est survenue.";
-                toast.error("Échec de la mise à jour");
-            }
+// État local
+const editing = ref(false);
+const form = ref({ ...props.formation });
+const errors = ref({});
+const errorGeneral = ref("");
+const saving = ref(false);
 
-            this.saving = false;
-        },
-        confirmDelete(e) {
-            if (!confirm("Confirmer la suppression ?")) e.preventDefault();
-        },
-        formatDate(d) {
-            if (!d) return "";
-            return new Date(d).toLocaleString("fr-FR");
-        },
-    },
-};
+function startEdit() {
+    editing.value = true;
+    errors.value = {};
+    errorGeneral.value = "";
+}
+
+function cancelEdit() {
+    editing.value = false;
+    form.value = { ...props.formation };
+    errors.value = {};
+    errorGeneral.value = "";
+}
+
+function addModalite() {
+    form.value.modalites = form.value.modalites || [];
+    form.value.modalites.push("");
+}
+
+function removeModalite(i) {
+    form.value.modalites.splice(i, 1);
+}
+
+function addObjectif() {
+    form.value.objectifs = form.value.objectifs || [];
+    form.value.objectifs.push("");
+}
+
+function removeObjectif(i) {
+    form.value.objectifs.splice(i, 1);
+}
+
+async function saveChanges() {
+    saving.value = true;
+    errors.value = {};
+    errorGeneral.value = "";
+    try {
+        const res = await fetch(props.saveUrl, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form.value),
+        });
+        if (res.ok) {
+            toast.success("Formation mise à jour !");
+            editing.value = false;
+            Object.assign(props.formation, form.value);
+        } else if (res.status === 400) {
+            const json = await res.json();
+            errors.value = json.violations || {};
+            errorGeneral.value = json.message || "";
+            toast.error("Erreur de validation");
+        } else {
+            throw new Error();
+        }
+    } catch {
+        errorGeneral.value = "Une erreur est survenue.";
+        toast.error("Échec de la mise à jour");
+    } finally {
+        saving.value = false;
+    }
+}
+
+function confirmDelete(e) {
+    if (!confirm("Confirmer la suppression ?")) e.preventDefault();
+}
+
+function formatDate(d) {
+    return d ? new Date(d).toLocaleString("fr-FR") : "";
+}
 </script>
 
 <style scoped>
-/* Tout le style est assuré par Tailwind + DaisyUI */
+/* Style géré par Tailwind + DaisyUI */
 </style>

@@ -12,7 +12,6 @@
                 }"
                 @click="setTab('formations')"
             >
-                <!-- Vous pouvez ajouter une icône ici si vous le souhaitez -->
                 Formations
             </button>
             <button
@@ -31,19 +30,13 @@
             v-if="tab === 'formations'"
             :api-url="apiUrl"
             :new-url="newUrl"
-            :is-stagiaire="isStagiaire"
         />
-        <SessionList
-            v-else
-            :api-url="sessionApi"
-            :new-url="sessionNew"
-            :is-stagiaire="isStagiaire"
-        />
+        <SessionList v-else :api-url="sessionApi" :new-url="sessionNew" />
     </section>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import FormationList from "./FormationList.vue";
 import SessionList from "../Session/SessionList.vue";
 
@@ -53,7 +46,6 @@ const props = defineProps({
     newUrl: { type: String, required: true },
     sessionApi: { type: String, required: true },
     sessionNew: { type: String, required: true },
-    userRoles: { type: Array, required: true },
 });
 
 function setTab(value) {
@@ -72,11 +64,10 @@ onMounted(() => {
     handleHash();
     window.addEventListener("hashchange", handleHash);
 });
+
 onBeforeUnmount(() => {
     window.removeEventListener("hashchange", handleHash);
 });
-
-const isStagiaire = computed(() => props.userRoles.includes("ROLE_STAGIAIRE"));
 </script>
 
 <style scoped>

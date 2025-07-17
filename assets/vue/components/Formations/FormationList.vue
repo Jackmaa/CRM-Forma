@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-semibold text-base-content">Formations</h2>
             <button
-                v-if="!isStagiaire"
+                v-if="isAdmin"
                 @click="goToNewFormation"
                 class="btn btn-primary btn-sm flex items-center"
             >
@@ -57,7 +57,7 @@
                         v-if="successId === formation.id"
                         class="text-success mt-1"
                     >
-                        Sauvegardé !
+                        Sauvegardé !
                     </p>
                     <p v-if="error" class="text-error mt-1">
                         {{ error }}
@@ -79,7 +79,7 @@
                             Voir détails
                         </a>
                         <button
-                            v-if="!isStagiaire"
+                            v-if="isAdmin"
                             @click="editFormation(formation)"
                             class="btn btn-ghost btn-sm"
                         >
@@ -95,12 +95,15 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { Plus } from "lucide-vue-next";
+import { useAuth } from "@/composables/useAuth";
+
+const { isStagiaire, roles, isAdmin } = useAuth();
 
 const props = defineProps({
     apiUrl: { type: String, required: true },
     newUrl: { type: String, required: true },
-    isStagiaire: { type: Boolean, required: true },
 });
+
 const formationShowTemplate =
     window.APP_ROUTES?.formationShow || "/formation/ID_PLACEHOLDER";
 const formationSaveUrl =
@@ -175,6 +178,7 @@ onMounted(async () => {
         description: f.description,
     }));
 });
+console.log("Is stagiaire:", isStagiaire.value);
 </script>
 
 <style scoped>

@@ -4,15 +4,7 @@
   <meta charset="UTF-8">
   <title>{% block title %}CRM{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  {{ encore_entry_link_tags('app') }}
-  {{ encore_entry_script_tags('app') }}
-</head>
-<body class="flex">
-  <div {{ vue_component('Layout/Sidebar') }}></div>
-  <main class="flex-1 p-4">
-    {% block body %}{% endblock %}
-  </main>
-{% if app.user %}
+  {% if app.user %}
     <script>
       window.APP_USER_ROLES = {{ app.user.roles|json_encode|raw }};
     </script>
@@ -21,5 +13,14 @@
       window.APP_USER_ROLES = [];
     </script>
 {% endif %}
+  {{ encore_entry_link_tags('app') }}
+  {{ encore_entry_script_tags('app') }}
+</head>
+<body class="flex">
+  <div {{ vue_component('Layout/Sidebar') }}></div>
+  <main class="flex-1 p-4">
+    {% block body %}{% endblock %}
+  </main>
+
 </body>
 </html>
