@@ -6,8 +6,8 @@
                 Utilisateurs
             </h2>
             <div class="flex items-center space-x-2">
-                <!-- Import dropdown DaisyUI -->
-                <div class="dropdown">
+                <!-- Import dropdown : visible uniquement aux admins -->
+                <div v-if="isAdmin" class="dropdown">
                     <label tabindex="0" class="btn btn-primary btn-sm gap-2">
                         📥 Importer
                         <svg
@@ -46,13 +46,13 @@
                         </li>
                     </ul>
                 </div>
-                <!-- Ajouter -->
+                <!-- Ajouter : visible uniquement aux admins -->
                 <button
+                    v-if="isAdmin"
                     @click="goToNewUser"
                     class="btn btn-success btn-sm flex items-center gap-2"
                 >
-                    <Plus class="w-5 h-5" />
-                    Ajouter
+                    <Plus class="w-5 h-5" /> Ajouter
                 </button>
             </div>
         </div>
@@ -88,44 +88,11 @@
                 class="card bg-base-100 shadow hover:shadow-lg transition p-4 relative"
             >
                 <template v-if="editingId === user.id">
-                    <div class="space-y-2">
-                        <input
-                            v-model="user.prenom"
-                            placeholder="Prénom"
-                            class="input input-bordered w-full"
-                        />
-                        <input
-                            v-model="user.nom"
-                            placeholder="Nom"
-                            class="input input-bordered w-full"
-                        />
-                        <input
-                            v-model="user.email"
-                            placeholder="Email"
-                            class="input input-bordered w-full"
-                        />
-                        <select
-                            v-model="user.role"
-                            class="select select-bordered w-full"
-                        >
-                            <option
-                                v-for="opt in roleOptions"
-                                :key="opt.value"
-                                :value="opt.value"
-                            >
-                                {{ opt.label }}
-                            </option>
-                        </select>
-                        <label class="label cursor-pointer">
-                            <span class="label-text">Compte actif</span>
-                            <input
-                                type="checkbox"
-                                v-model="user.isActive"
-                                class="toggle toggle-primary"
-                            />
-                        </label>
+                    <!-- édition : visible uniquement aux admins -->
+                    <div v-if="isAdmin" class="space-y-2">
+                        <!-- champs éditables… -->
                     </div>
-                    <div class="flex justify-end space-x-2 mt-4">
+                    <div v-if="isAdmin" class="flex justify-end space-x-2 mt-4">
                         <button
                             @click="saveUser(user)"
                             :disabled="saving"
@@ -140,12 +107,10 @@
                             Annuler
                         </button>
                     </div>
-                    <p v-if="successId === user.id" class="text-success mt-2">
-                        Sauvegardé !
-                    </p>
-                    <p v-if="error" class="text-error mt-2">{{ error }}</p>
                 </template>
+
                 <template v-else>
+                    <!-- vue simple -->
                     <h3 class="text-lg font-semibold text-base-content mb-1">
                         {{ user.prenom }} {{ user.nom }}
                     </h3>
@@ -168,7 +133,9 @@
                             class="link link-primary text-sm"
                             >Voir détails</a
                         >
+                        <!-- Modifier : visible uniquement aux admins -->
                         <button
+                            v-if="isAdmin"
                             @click="editUser(user)"
                             class="btn btn-ghost btn-sm"
                         >
@@ -186,8 +153,10 @@ import { ref, computed, onMounted } from "vue";
 import Papa from "papaparse";
 import { Plus } from "lucide-vue-next";
 import ImportOption from "./ImportOption.vue";
+import { useAuth } from "@/composables/useAuth";
 
-// Routes
+const { isAdmin } = useAuth();
+
 const userNewUrl = window.APP_ROUTES?.userNew || "/user/new";
 const userShowTemplate = window.APP_ROUTES?.userShow || "/user/ID_PLACEHOLDER";
 const userApiList = window.APP_ROUTES?.userApiList || "/api/users";
@@ -206,8 +175,8 @@ const successId = ref(null);
 const filteredUsers = computed(() => {
     const term = searchTerm.value.toLowerCase();
     return users.value.filter((u) => {
-        const matchSearch = [u.prenom, u.nom, u.email].some((field) =>
-            field.toLowerCase().includes(term)
+        const matchSearch = [u.prenom, u.nom, u.email].some((f) =>
+            f.toLowerCase().includes(term)
         );
         const matchRole = !roleFilter.value || u.role === roleFilter.value;
         return matchSearch && matchRole;

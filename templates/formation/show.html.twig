@@ -24,8 +24,6 @@
     saveUrl: path('formation_edit', { id: formation.id }),
     deleteUrl: path('formation_delete', { id: formation.id }),
     csrfToken: csrf_token('delete' ~ formation.id),
-    isAdmin: is_granted('ROLE_ADMIN_CENTRE'),
-    isStagiaire: is_granted('ROLE_STAGIAIRE'),
   })
 }}></div>
 

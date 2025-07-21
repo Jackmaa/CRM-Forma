@@ -11,10 +11,16 @@
             </h1>
             <div class="mt-3 md:mt-0 flex gap-2">
                 <template v-if="!editing">
-                    <button @click="startEdit" class="btn btn-outline btn-sm">
+                    <!-- boutons Éditer/Supprimer : visibles uniquement aux admins -->
+                    <button
+                        v-if="isAdmin"
+                        @click="startEdit"
+                        class="btn btn-outline btn-sm"
+                    >
                         ✏️ Éditer
                     </button>
                     <form
+                        v-if="isAdmin"
                         :action="deleteUrl"
                         method="post"
                         @submit="confirmDelete"
@@ -143,6 +149,7 @@
 <script>
 import { ref, reactive } from "vue";
 import { toast } from "@/composables/useToast";
+import { useAuth } from "@/composables/useAuth";
 import ToastContainer from "@/components/ToastContainer.vue";
 import InfoRow from "@/components/InfoRow.vue";
 import SectionCard from "@/components/SectionCard.vue";
@@ -155,37 +162,25 @@ export default {
         saveUrl: String,
         deleteUrl: String,
         csrfToken: String,
-        isAdmin: Boolean,
     },
     setup(props) {
+        const { isAdmin } = useAuth();
+
         const editing = ref(false);
         const saving = ref(false);
         const errors = reactive({});
         const errorGeneral = ref("");
-        const form = reactive({
-            prenom: props.user.prenom,
-            nom: props.user.nom,
-            email: props.user.email,
-            role: props.user.role,
-            isActive: props.user.isActive,
-            password: "",
-        });
+        const form = reactive({ ...props.user, password: "" });
 
         function startEdit() {
+            if (!isAdmin.value) return;
             editing.value = true;
             Object.keys(errors).forEach((k) => delete errors[k]);
             errorGeneral.value = "";
         }
         function cancelEdit() {
             editing.value = false;
-            Object.assign(form, {
-                prenom: props.user.prenom,
-                nom: props.user.nom,
-                email: props.user.email,
-                role: props.user.role,
-                isActive: props.user.isActive,
-                password: "",
-            });
+            Object.assign(form, { ...props.user, password: "" });
             Object.keys(errors).forEach((k) => delete errors[k]);
             errorGeneral.value = "";
         }
@@ -220,7 +215,8 @@ export default {
             saving.value = false;
         }
         function confirmDelete(e) {
-            if (!confirm("Confirmer la suppression ?")) e.preventDefault();
+            if (!isAdmin.value || !confirm("Confirmer la suppression ?"))
+                e.preventDefault();
         }
         function roleLabel(v) {
             return (
@@ -234,6 +230,7 @@ export default {
         }
 
         return {
+            isAdmin,
             editing,
             form,
             errors,
