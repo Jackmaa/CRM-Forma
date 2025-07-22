@@ -27,19 +27,19 @@ final class HomeController extends AbstractController {
     ): Response {
         $count = $centreRepo->count([]);
 
-        // 1) Pas de centre → on crée
+        // 1) Aucun centre → on redirige vers la création d'un centre
         if ($count === 0) {
             return $this->redirectToRoute('centre_new');
         }
 
-        // 2) Un seul centre → on le mémorise et on va au login
+        // 2) Un seul centre → on le mémorise et on va au tableau de bord
         $centres = $centreRepo->findAll();
         if ($count === 1) {
             $session->set('centre_id', $centres[0]->getId());
             return $this->render('home/dashboard.html.twig');
         }
 
-        // 3) Plusieurs centres → on propose une sélection
+        // 3) Plusieurs centres → on propose une sélection à l'utilisateur
         if ($request->isMethod('POST')) {
             $selectedId = $request->request->getInt('centre_id');
             // (Optionnel : valider que $selectedId est bien dans la liste)
@@ -47,6 +47,7 @@ final class HomeController extends AbstractController {
             return $this->render('home/dashboard.html.twig');
         }
 
+        // Affiche la page de sélection de centre si plusieurs centres existent
         return $this->render('centre/select.html.twig', [
             'centres' => $centres,
         ]);

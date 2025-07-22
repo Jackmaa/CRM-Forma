@@ -58,6 +58,25 @@
 </template>
 
 <script setup>
+/**
+ * Composant wizard multi-étapes pour la création d'une session de formation.
+ *
+ * Affiche une barre de progression, gère la navigation entre les étapes, collecte les données et soumet la session à l'API.
+ *
+ * Étapes :
+ * - Formation
+ * - Dates
+ * - Formateurs
+ * - Participants
+ * - Mode & Lieu
+ * - Récapitulatif
+ *
+ * État local :
+ * - currentStep : index de l'étape courante
+ * - wizardData : données collectées à chaque étape
+ * - submitting : état d'envoi
+ * - error : message d'erreur
+ */
 import { ref, reactive, computed } from "vue";
 import StepFormation from "./steps/StepFormation.vue";
 import StepSchedule from "./steps/StepSchedule.vue";
@@ -92,18 +111,32 @@ const wizardData = reactive({
 
 const isLast = computed(() => currentStep.value === steps.length - 1);
 
+/**
+ * Met à jour les données du wizard à chaque étape.
+ * @param {Object} payload
+ */
 function onStepUpdate(payload) {
     Object.assign(wizardData, payload);
 }
 
+/**
+ * Passe à l'étape suivante.
+ */
 function next() {
     error.value = "";
     currentStep.value++;
 }
+
+/**
+ * Revient à l'étape précédente.
+ */
 function prev() {
     currentStep.value--;
 }
 
+/**
+ * Soumet la session à l'API à la dernière étape.
+ */
 async function submit() {
     submitting.value = true;
     error.value = "";

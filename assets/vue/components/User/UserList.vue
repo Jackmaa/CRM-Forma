@@ -149,6 +149,20 @@
 </template>
 
 <script setup>
+/**
+ * Composant d'affichage de la liste des utilisateurs.
+ *
+ * Affiche les utilisateurs sous forme de cartes, permet la recherche, le filtrage, l'import (admin), l'édition rapide (admin), et la navigation vers le détail.
+ *
+ * État local :
+ * - users : liste des utilisateurs
+ * - searchTerm : terme de recherche
+ * - roleFilter : filtre par rôle
+ * - editingId : id de l'utilisateur en édition
+ * - saving : état de sauvegarde
+ * - error : message d'erreur
+ * - successId : id de l'utilisateur sauvegardé avec succès
+ */
 import { ref, computed, onMounted } from "vue";
 import Papa from "papaparse";
 import { Plus } from "lucide-vue-next";

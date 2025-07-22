@@ -45,6 +45,24 @@
 </template>
 
 <script setup>
+/**
+ * Étape 6 du wizard : récapitulatif final avant validation.
+ *
+ * Affiche un résumé complet de la session et permet de revenir à une étape précédente pour modification.
+ *
+ * Props :
+ * - formationId (Number)
+ * - dateDebut (String)
+ * - dateFin (String)
+ * - formateurIds (Array)
+ * - participantIds (Array)
+ * - modalite (String)
+ * - lieu (String)
+ * - steps (Array) : liste des étapes du wizard
+ *
+ * Événements :
+ * - edit-step : émis lors du clic sur un bouton "Modifier ..."
+ */
 import { ref, onMounted, computed } from "vue";
 
 const props = defineProps({
@@ -63,6 +81,7 @@ const formationTitle = ref("");
 const formateurs = ref([]);
 const participants = ref([]);
 
+// Chargement des infos de formation, formateurs et participants
 onMounted(async () => {
     // Récupère le titre de la formation
     const f = await fetch(`/formation/api/${props.formationId}`).then((r) =>
@@ -88,6 +107,11 @@ onMounted(async () => {
     }
 });
 
+/**
+ * Formate une date ISO en chaîne lisible (fr-FR).
+ * @param {string} iso
+ * @returns {string}
+ */
 function formatDate(iso) {
     if (!iso) return "";
     const d = new Date(iso);
@@ -104,6 +128,10 @@ const selectedParticipants = computed(() =>
     participants.value.map((u) => `${u.prenom} ${u.nom}`).join(", ")
 );
 
+/**
+ * Émet l'événement pour revenir à une étape donnée.
+ * @param {number} index
+ */
 function editStep(index) {
     emit("edit-step", index);
 }

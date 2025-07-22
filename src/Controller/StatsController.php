@@ -11,6 +11,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur pour les statistiques du tableau de bord.
+ */
 class StatsController extends AbstractController {
 
     public function __construct(
@@ -20,14 +23,20 @@ class StatsController extends AbstractController {
         private Connection $connection
     ) {}
 
+    /**
+     * Affiche la page des statistiques (vue Twig).
+     *
+     * @return Response La vue des statistiques.
+     */
     #[Route('/stats', name: 'app_stats')]
     public function index(): Response {
         return $this->render('stats/stats.html.twig');
     }
 
     /**
-     * GET /api/dashboard/kpis
-     * Retourne le nombre de users, formations, rapports, sessions actives.
+     * Retourne les KPIs du dashboard (API JSON).
+     *
+     * @return JsonResponse Les indicateurs clés (utilisateurs, formations, rapports, sessions).
      */
     #[Route('/api/stats/kpis', name: 'dashboard_kpis', methods: ['GET'])]
     public function kpis(): JsonResponse {
@@ -36,7 +45,7 @@ class StatsController extends AbstractController {
         $usersCount      = $this->userRepo->count(['centre' => $centre]);
         $formationsCount = $this->formationRepo->count(['centre' => $centre]);
 
-        // Rapports === sessions terminées ce mois-ci (exemple)
+        // Rapports = sessions terminées ce mois-ci (exemple)
         $reportsCount = $this->sessionRepo->countFinishedThisMonth($centre);
 
         // Sessions actives : dateDebut ≤ now ≤ dateFin

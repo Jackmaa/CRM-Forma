@@ -25,6 +25,17 @@
 </template>
 
 <script setup>
+/**
+ * Composant carte utilisateur réutilisable.
+ *
+ * Affiche les initiales, le nom, l'email, et un bouton "Voir".
+ *
+ * Props :
+ * - user (Object, requis) : Données utilisateur (id, name, email, initials).
+ *
+ * Événements :
+ * - view : émis au clic sur le bouton "Voir".
+ */
 const props = defineProps({
     user: {
         type: Object,

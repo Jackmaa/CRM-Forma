@@ -65,6 +65,19 @@
 </template>
 
 <script setup>
+/**
+ * Composant d'affichage de la liste des sessions.
+ *
+ * Affiche les sessions sous forme de cartes, permet la recherche, la navigation vers le détail et l'édition (admin).
+ *
+ * Props :
+ * - apiUrl (String, requis) : URL d'API pour charger les sessions.
+ * - newUrl (String, requis) : URL pour créer une nouvelle session.
+ *
+ * État local :
+ * - sessions : liste des sessions
+ * - search : terme de recherche
+ */
 import { ref, computed, onMounted } from "vue";
 import { Plus } from "lucide-vue-next";
 import { useAuth } from "@/composables/useAuth";
@@ -79,6 +92,9 @@ const props = defineProps({
 const sessions = ref([]);
 const search = ref("");
 
+/**
+ * Charge les sessions depuis l'API.
+ */
 async function load() {
     const res = await fetch(props.apiUrl);
     if (!res.ok) return;
@@ -92,20 +108,43 @@ async function load() {
     }));
 }
 
+/**
+ * Liste filtrée selon le terme de recherche.
+ */
 const filtered = computed(() => {
     const term = search.value.toLowerCase();
     return sessions.value.filter((s) => s.titre.toLowerCase().includes(term));
 });
 
+/**
+ * Redirige vers la page de création de session.
+ */
 function goToNew() {
     window.location.href = props.newUrl;
 }
+
+/**
+ * Retourne l'URL de détail pour une session donnée.
+ * @param {number|string} id
+ * @returns {string}
+ */
 function showUrl(id) {
     return `/session/${id}`;
 }
+
+/**
+ * Redirige vers la page d'édition d'une session.
+ * @param {number|string} id
+ */
 function edit(id) {
     window.location.href = `/session/${id}/edit`;
 }
+
+/**
+ * Formate une date ISO en chaîne lisible (fr-FR).
+ * @param {string} iso
+ * @returns {string}
+ */
 function formatDate(iso) {
     if (!iso) return "";
     const d = new Date(iso);

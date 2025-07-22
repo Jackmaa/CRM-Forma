@@ -38,5 +38,5 @@ registerVueControllerComponents(
     }
 );
 
-// 4) Enfin, démarrez Stimulus (bootstrap.js contient startStimulusApp)
+// 4) Enfin, démarrer Stimulus (bootstrap.js contient startStimulusApp)
 require("./bootstrap.js");

@@ -264,6 +264,24 @@
 </template>
 
 <script setup>
+/**
+ * Composant d'affichage détaillé d'une formation.
+ *
+ * Affiche le résumé, les modalités, les objectifs, la description, et permet l'édition (admin).
+ *
+ * Props :
+ * - formation (Object, requis) : Données de la formation.
+ * - saveUrl (String, requis) : URL d'API pour sauvegarder les modifications.
+ * - deleteUrl (String, requis) : URL d'API pour supprimer la formation.
+ * - csrfToken (String, requis) : Jeton CSRF pour la suppression.
+ *
+ * État local :
+ * - editing : mode édition activé ou non
+ * - form : copie locale de la formation pour édition
+ * - errors : erreurs de validation
+ * - errorGeneral : erreur générale
+ * - saving : état de sauvegarde
+ */
 import { ref } from "vue";
 import { toast } from "@/composables/useToast";
 import { useAuth } from "@/composables/useAuth";
@@ -288,12 +306,18 @@ const errors = ref({});
 const errorGeneral = ref("");
 const saving = ref(false);
 
+/**
+ * Passe en mode édition.
+ */
 function startEdit() {
     editing.value = true;
     errors.value = {};
     errorGeneral.value = "";
 }
 
+/**
+ * Annule l'édition et restaure les valeurs d'origine.
+ */
 function cancelEdit() {
     editing.value = false;
     form.value = { ...props.formation };
@@ -301,24 +325,41 @@ function cancelEdit() {
     errorGeneral.value = "";
 }
 
+/**
+ * Ajoute une modalité pédagogique.
+ */
 function addModalite() {
     form.value.modalites = form.value.modalites || [];
     form.value.modalites.push("");
 }
 
+/**
+ * Supprime une modalité pédagogique.
+ * @param {number} i Index de la modalité à supprimer
+ */
 function removeModalite(i) {
     form.value.modalites.splice(i, 1);
 }
 
+/**
+ * Ajoute un objectif pédagogique.
+ */
 function addObjectif() {
     form.value.objectifs = form.value.objectifs || [];
     form.value.objectifs.push("");
 }
 
+/**
+ * Supprime un objectif pédagogique.
+ * @param {number} i Index de l'objectif à supprimer
+ */
 function removeObjectif(i) {
     form.value.objectifs.splice(i, 1);
 }
 
+/**
+ * Sauvegarde les modifications de la formation via l'API.
+ */
 async function saveChanges() {
     saving.value = true;
     errors.value = {};
@@ -349,10 +390,19 @@ async function saveChanges() {
     }
 }
 
+/**
+ * Demande confirmation avant suppression de la formation.
+ * @param {Event} e
+ */
 function confirmDelete(e) {
     if (!confirm("Confirmer la suppression ?")) e.preventDefault();
 }
 
+/**
+ * Formate une date en chaîne lisible (fr-FR).
+ * @param {string|Date} d
+ * @returns {string}
+ */
 function formatDate(d) {
     return d ? new Date(d).toLocaleString("fr-FR") : "";
 }

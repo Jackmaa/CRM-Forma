@@ -9,6 +9,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: FormationRepository::class)]
 #[ORM\Table(name: 'formations')]
+/**
+ * Entité représentant une formation (catalogue, sessions, etc.).
+ */
 class Formation {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -203,14 +206,21 @@ class Formation {
     }
 
     /**
-     * @return Collection<int, Session>
+     * Retourne la liste des sessions associées à cette formation.
+     *
+     * @return Collection<int, Session> Liste des sessions.
      */
     public function getSessions(): Collection {
         return $this->sessions;
     }
 
-    public function addSession(Session $session): static
-    {
+    /**
+     * Ajoute une session à la formation.
+     *
+     * @param Session $session La session à ajouter.
+     * @return static
+     */
+    public function addSession(Session $session): static {
         if (! $this->sessions->contains($session)) {
             $this->sessions->add($session);
             $session->setFormation($this);
@@ -218,8 +228,13 @@ class Formation {
         return $this;
     }
 
-    public function removeSession(Session $session): static
-    {
+    /**
+     * Retire une session de la formation.
+     *
+     * @param Session $session La session à retirer.
+     * @return static
+     */
+    public function removeSession(Session $session): static {
         if ($this->sessions->removeElement($session)) {
             if ($session->getFormation() === $this) {
                 $session->setFormation(null);

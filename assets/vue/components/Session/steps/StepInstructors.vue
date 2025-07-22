@@ -24,6 +24,17 @@
 </template>
 
 <script setup>
+/**
+ * Étape 3 du wizard : sélection des formateurs.
+ *
+ * Affiche un select multiple pour choisir les formateurs disponibles.
+ *
+ * Props :
+ * - formateurIds (Array) : IDs des formateurs sélectionnés.
+ *
+ * Événements :
+ * - update : émis à chaque changement de sélection.
+ */
 import { ref, reactive, onMounted, watch } from "vue";
 
 const props = defineProps({
@@ -34,13 +45,14 @@ const props = defineProps({
 });
 const emit = defineEmits(["update"]);
 
-// Local copy of the selected IDs
+// Copie locale des IDs sélectionnés
 const local = reactive({ formateurIds: [...props.formateurIds] });
 
-// List of available instructors
+// Liste des formateurs disponibles
 const instructors = ref([]);
 const error = ref("");
 
+// Chargement des formateurs
 onMounted(async () => {
     try {
         const res = await fetch("/api/users?role=FORMATEUR");
@@ -51,7 +63,7 @@ onMounted(async () => {
     }
 });
 
-// Émettre les modifications vers le parent
+// Émettre les modifications vers le parent à chaque changement
 watch(
     () => local.formateurIds,
     (val) => emit("update", { formateurIds: val }),

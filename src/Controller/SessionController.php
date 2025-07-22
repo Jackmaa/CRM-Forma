@@ -12,6 +12,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+/**
+ * Contrôleur pour la gestion des sessions (CRUD et API).
+ */
 #[Route('/session')]
 #[IsGranted('ROLE_ADMIN_CENTRE')]
 class SessionController extends AbstractController {
@@ -19,12 +22,24 @@ class SessionController extends AbstractController {
     // 1) CRUD classique (Twig)
     // --------------------------------------------------------------------------
 
+    /**
+     * Affiche la liste des sessions (vue Twig).
+     *
+     * @return Response La vue listant les sessions.
+     */
     #[Route('/', name: 'session_index', methods: ['GET'])]
     public function index(): Response {
         // Rend une page Twig avec <div {{ vue_component('Session/SessionList') }}>
         return $this->render('session/index.html.twig');
     }
 
+    /**
+     * Crée une nouvelle session (formulaire).
+     *
+     * @param Request $request La requête HTTP.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return Response La vue du formulaire ou la redirection après succès.
+     */
     #[Route('/new', name: 'session_new', methods: ['GET', 'POST'])]
     public function new (Request $request, EntityManagerInterface $em): Response {
         $session = new Session();
@@ -47,6 +62,12 @@ class SessionController extends AbstractController {
         ]);
     }
 
+    /**
+     * Affiche le détail d'une session.
+     *
+     * @param Session $session L'entité session à afficher.
+     * @return Response La vue de détail de la session.
+     */
     #[Route(
         '/{id}',
         name: 'session_show',
@@ -54,7 +75,7 @@ class SessionController extends AbstractController {
         requirements: ['id' => '\d+']
     )]
     public function show(Session $session): Response {
-        // Sécurité : même centre
+        // Sécurité : vérifie que la session appartient au même centre que l'utilisateur
         if ($session->getCentre() !== $this->getUser()->getCentre()) {
             throw $this->createAccessDeniedException();
         }
@@ -64,6 +85,14 @@ class SessionController extends AbstractController {
         ]);
     }
 
+    /**
+     * Modifie une session existante (formulaire).
+     *
+     * @param Request $request La requête HTTP.
+     * @param Session $session L'entité session à modifier.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return Response La vue d'édition ou la redirection après succès.
+     */
     #[Route(
         '/{id}/edit',
         name: 'session_edit',
@@ -95,6 +124,14 @@ class SessionController extends AbstractController {
         ]);
     }
 
+    /**
+     * Supprime une session.
+     *
+     * @param Request $request La requête HTTP.
+     * @param Session $session L'entité session à supprimer.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return Response Redirige vers la liste après suppression.
+     */
     #[Route(
         '/{id}/delete',
         name: 'session_delete',
@@ -121,6 +158,12 @@ class SessionController extends AbstractController {
     // 2) API (JSON)
     // --------------------------------------------------------------------------
 
+    /**
+     * Retourne la liste des sessions du centre de l'utilisateur (API JSON).
+     *
+     * @param SessionRepository $repo Le repository des sessions.
+     * @return JsonResponse La liste des sessions au format JSON.
+     */
     #[Route('/api', name: 'api_session_list', methods: ['GET'])]
     public function apiList(SessionRepository $repo): JsonResponse {
         $sessions = $repo->findBy(['centre' => $this->getUser()->getCentre()]);
@@ -137,6 +180,13 @@ class SessionController extends AbstractController {
         return $this->json($data);
     }
 
+    /**
+     * Crée une session via l'API (JSON).
+     *
+     * @param Request $request La requête HTTP.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return JsonResponse Succès ou erreurs de validation.
+     */
     #[Route('/api', name: 'api_session_create', methods: ['POST'])]
     public function apiCreate(
         Request $request,
@@ -163,6 +213,14 @@ class SessionController extends AbstractController {
         return $this->json(['success' => true, 'id' => $session->getId()], 201);
     }
 
+    /**
+     * Met à jour une session via l'API (JSON).
+     *
+     * @param Session $session L'entité session à modifier.
+     * @param Request $request La requête HTTP.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return JsonResponse Succès ou erreurs de validation.
+     */
     #[Route(
         '/api/{id}',
         name: 'api_session_update',
@@ -195,10 +253,10 @@ class SessionController extends AbstractController {
     }
 
     /**
-     * Helper pour extraire les messages d’erreur du FormType
+     * Helper pour extraire les messages d’erreur du FormType.
      *
-     * @param iterable $errors
-     * @return array<string, string[]>
+     * @param iterable $errors Les erreurs du formulaire.
+     * @return array<string, string[]> Tableau des erreurs par champ.
      */
     private function getFormErrors(iterable $errors): array {
         $out = [];

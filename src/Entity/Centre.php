@@ -9,6 +9,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CentreRepository::class)]
 #[ORM\Table(name: 'centres')]
+/**
+ * Entité représentant un centre de formation (structure, utilisateurs, formations, sessions).
+ */
 class Centre {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -126,14 +129,21 @@ class Centre {
     }
 
     /**
-     * @return Collection<int, User>
+     * Retourne la liste des utilisateurs du centre.
+     *
+     * @return Collection<int, User> Liste des utilisateurs.
      */
     public function getUsers(): Collection {
         return $this->users;
     }
 
-    public function addUser(User $user): static
-    {
+    /**
+     * Ajoute un utilisateur au centre.
+     *
+     * @param User $user L'utilisateur à ajouter.
+     * @return static
+     */
+    public function addUser(User $user): static {
         if (! $this->users->contains($user)) {
             $this->users->add($user);
             $user->setCentre($this);
@@ -141,8 +151,13 @@ class Centre {
         return $this;
     }
 
-    public function removeUser(User $user): static
-    {
+    /**
+     * Retire un utilisateur du centre.
+     *
+     * @param User $user L'utilisateur à retirer.
+     * @return static
+     */
+    public function removeUser(User $user): static {
         if ($this->users->removeElement($user)) {
             if ($user->getCentre() === $this) {
                 $user->setCentre(null);
@@ -152,14 +167,21 @@ class Centre {
     }
 
     /**
-     * @return Collection<int, Formation>
+     * Retourne la liste des formations du centre.
+     *
+     * @return Collection<int, Formation> Liste des formations.
      */
     public function getFormations(): Collection {
         return $this->formations;
     }
 
-    public function addFormation(Formation $formation): static
-    {
+    /**
+     * Ajoute une formation au centre.
+     *
+     * @param Formation $formation La formation à ajouter.
+     * @return static
+     */
+    public function addFormation(Formation $formation): static {
         if (! $this->formations->contains($formation)) {
             $this->formations->add($formation);
             $formation->setCentre($this);
@@ -167,8 +189,13 @@ class Centre {
         return $this;
     }
 
-    public function removeFormation(Formation $formation): static
-    {
+    /**
+     * Retire une formation du centre.
+     *
+     * @param Formation $formation La formation à retirer.
+     * @return static
+     */
+    public function removeFormation(Formation $formation): static {
         if ($this->formations->removeElement($formation)) {
             if ($formation->getCentre() === $this) {
                 $formation->setCentre(null);
@@ -178,14 +205,21 @@ class Centre {
     }
 
     /**
-     * @return Collection<int, Session>
+     * Retourne la liste des sessions du centre.
+     *
+     * @return Collection<int, Session> Liste des sessions.
      */
     public function getSessions(): Collection {
         return $this->sessions;
     }
 
-    public function addSession(Session $session): static
-    {
+    /**
+     * Ajoute une session au centre.
+     *
+     * @param Session $session La session à ajouter.
+     * @return static
+     */
+    public function addSession(Session $session): static {
         if (! $this->sessions->contains($session)) {
             $this->sessions->add($session);
             $session->setCentre($this);
@@ -193,8 +227,13 @@ class Centre {
         return $this;
     }
 
-    public function removeSession(Session $session): static
-    {
+    /**
+     * Retire une session du centre.
+     *
+     * @param Session $session La session à retirer.
+     * @return static
+     */
+    public function removeSession(Session $session): static {
         if ($this->sessions->removeElement($session)) {
             if ($session->getCentre() === $this) {
                 $session->setCentre(null);

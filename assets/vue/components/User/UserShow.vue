@@ -147,6 +147,24 @@
 </template>
 
 <script>
+/**
+ * Composant d'affichage détaillé d'un utilisateur.
+ *
+ * Affiche les informations, permet l'édition (admin) et la suppression.
+ *
+ * Props :
+ * - user (Object) : Données de l'utilisateur.
+ * - saveUrl (String) : URL d'API pour sauvegarder les modifications.
+ * - deleteUrl (String) : URL d'API pour supprimer l'utilisateur.
+ * - csrfToken (String) : Jeton CSRF pour la suppression.
+ *
+ * État local :
+ * - editing : mode édition activé ou non
+ * - form : copie locale de l'utilisateur pour édition
+ * - errors : erreurs de validation
+ * - errorGeneral : erreur générale
+ * - saving : état de sauvegarde
+ */
 import { ref, reactive } from "vue";
 import { toast } from "@/composables/useToast";
 import { useAuth } from "@/composables/useAuth";

@@ -106,10 +106,23 @@ import { ref, computed } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import SidebarLink from "./SidebarLink.vue";
 import { useUserSettings } from "@/composables/useUserSettings.js";
-
+/**
+ * Composant de la barre latérale du CRM.
+ *
+ * Affiche les liens de navigation principaux et gère le mode compact.
+ * Inclut un badge d'alerte pour les paramètres si nécessaire.
+ */
+/* Props :
+ * - isCollapsed (Boolean) : Indique si la barre latérale est en mode compact.
+ * - forcePasswordReset (Boolean) : Indique si un changement de mot de passe est requis.
+ */
 const isCollapsed = ref(false);
 const { forcePasswordReset } = useUserSettings();
 
+/**
+ * Classe CSS pour le lien des paramètres, change si un changement de mot de passe est requis.
+ * Utilise DaisyUI pour la mise en forme.
+ */
 const paramLinkClass = computed(() =>
     forcePasswordReset.value
         ? "text-error relative"
@@ -118,5 +131,5 @@ const paramLinkClass = computed(() =>
 </script>
 
 <style scoped>
-/* DaisyUI menu handles styling */
+/* Pas de styles spécifiques, utilisation de DaisyUI pour la mise en forme */
 </style>

@@ -36,6 +36,22 @@
 </template>
 
 <script setup>
+/**
+ * Composant d'onglets pour naviguer entre la liste des formations et la liste des sessions.
+ *
+ * Affiche deux onglets stylés DaisyUI :
+ * - Formations
+ * - Sessions
+ *
+ * Props :
+ * - apiUrl (String, requis) : URL d'API pour charger les formations.
+ * - newUrl (String, requis) : URL pour créer une nouvelle formation.
+ * - sessionApi (String, requis) : URL d'API pour charger les sessions.
+ * - sessionNew (String, requis) : URL pour créer une nouvelle session.
+ *
+ * État local :
+ * - tab : onglet actif ('formations' ou 'sessions')
+ */
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import FormationList from "./FormationList.vue";
 import SessionList from "../Session/SessionList.vue";
@@ -48,11 +64,18 @@ const props = defineProps({
     sessionNew: { type: String, required: true },
 });
 
+/**
+ * Change l'onglet actif et met à jour le hash de l'URL.
+ * @param {string} value
+ */
 function setTab(value) {
     tab.value = value;
     location.hash = value;
 }
 
+/**
+ * Gère le changement d'onglet via le hash de l'URL.
+ */
 function handleHash() {
     const h = location.hash.replace("#", "");
     if (h === "sessions" || h === "formations") {

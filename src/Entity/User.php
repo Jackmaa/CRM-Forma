@@ -10,6 +10,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
+/**
+ * Entité représentant un utilisateur du CRM (stagiaire, formateur, admin, etc.).
+ *
+ * Gère l'authentification, les rôles, et les relations avec le centre.
+ */
 class User implements UserInterface, PasswordAuthenticatedUserInterface {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -68,16 +73,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     }
 
     /**
-     * A visual identifier that represents this user.
+     * Retourne l'identifiant unique de l'utilisateur (email).
      *
      * @see UserInterface
+     * @return string L'email de l'utilisateur.
      */
     public function getUserIdentifier(): string {
         return (string) $this->email;
     }
 
     /**
+     * Retourne les rôles Symfony de l'utilisateur (ROLE_USER, ROLE_ADMIN_CENTRE, etc.).
+     *
      * @see UserInterface
+     * @return array Liste des rôles Symfony.
      */
     public function getRoles(): array {
         $roles = ['ROLE_USER'];
@@ -90,7 +99,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     }
 
     /**
+     * Retourne le mot de passe hashé de l'utilisateur.
+     *
      * @see PasswordAuthenticatedUserInterface
+     * @return string Mot de passe hashé.
      */
     public function getPassword(): string {
         return $this->password;
@@ -103,10 +115,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     }
 
     /**
+     * Efface les données sensibles temporaires (non utilisé ici).
+     *
      * @see UserInterface
      */
     public function eraseCredentials(): void {
-        // If you store any temporary, sensitive data on the user, clear it here
+        // Si vous stockez des données sensibles temporaires, effacez-les ici
     }
 
     public function getNom(): ?string {
@@ -129,10 +143,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
         return $this;
     }
 
+    /**
+     * Retourne le nom complet de l'utilisateur (prénom + nom).
+     *
+     * @return string Nom complet.
+     */
     public function getFullName(): string {
         return $this->prenom . ' ' . $this->nom;
     }
 
+    /**
+     * Retourne les initiales de l'utilisateur (ex: JD pour Jean Dupont).
+     *
+     * @return string Initiales.
+     */
     public function getInitials(): string {
         return strtoupper(substr($this->prenom, 0, 1) . substr($this->nom, 0, 1));
     }
@@ -161,22 +185,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
         return $this->created_at;
     }
 
+    /**
+     * Vérifie si l'utilisateur est formateur.
+     *
+     * @return bool Vrai si formateur.
+     */
     public function isFormateur() : bool {
         return $this->role === UserRole::FORMATEUR;
     }
 
+    /**
+     * Vérifie si l'utilisateur est administrateur de centre.
+     *
+     * @return bool Vrai si admin centre.
+     */
     public function isAdminCentre(): bool {
         return $this->role === UserRole::ADMIN_CENTRE;
     }
 
+    /**
+     * Vérifie si l'utilisateur est stagiaire.
+     *
+     * @return bool Vrai si stagiaire.
+     */
     public function isStagiaire(): bool {
         return $this->role === UserRole::STAGIAIRE;
     }
 
+    /**
+     * Vérifie si l'utilisateur est assistant.
+     *
+     * @return bool Vrai si assistant.
+     */
     public function isAssistant(): bool {
         return $this->role === UserRole::ASSISTANT;
     }
 
+    /**
+     * Indique si le compte utilisateur est actif.
+     *
+     * @return bool Vrai si actif.
+     */
     public function isActive(): bool {
         return $this->isActive;
     }
@@ -186,6 +235,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
         return $this;
     }
 
+    /**
+     * Indique si l'utilisateur doit forcer la réinitialisation de son mot de passe.
+     *
+     * @return bool Vrai si le reset est forcé.
+     */
     public function getForcePasswordReset(): bool {
         return $this->forcePasswordReset;
     }

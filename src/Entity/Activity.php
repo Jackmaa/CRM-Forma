@@ -5,6 +5,9 @@ use App\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
+/**
+ * Entité représentant une activité (log d'action utilisateur sur une entité du CRM).
+ */
 #[ORM\Entity(repositoryClass: App\Repository\ActivityRepository::class)]
 class Activity {
     #[ORM\Id]
@@ -91,6 +94,11 @@ class Activity {
         return $this;
     }
 
+    /**
+     * Retourne la date/heure de création de l'activité.
+     *
+     * @return \DateTimeImmutable Date de création.
+     */
     public function getCreatedAt(): \DateTimeImmutable {
         return $this->createdAt;
     }

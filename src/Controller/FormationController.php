@@ -14,7 +14,10 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/formation', name: 'formation_')]
 class FormationController extends AbstractController {
     /**
-     * Liste toutes les formations du centre de l’utilisateur.
+     * Liste toutes les formations du centre de l’utilisateur connecté.
+     *
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return Response La vue listant les formations.
      */
     #[Route('', name: 'index', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
@@ -30,7 +33,10 @@ class FormationController extends AbstractController {
     }
 
     /**
-     * Même liste que index(), format JSON pour API.
+     * Même liste que index(), mais retourne le résultat au format JSON (API).
+     *
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return JsonResponse La liste des formations au format JSON.
      */
     #[Route('/api', name: 'api', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
@@ -51,6 +57,10 @@ class FormationController extends AbstractController {
 
     /**
      * Création d’une nouvelle formation.
+     *
+     * @param Request $request La requête HTTP.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return Response La vue du formulaire de création ou la redirection après succès.
      */
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN_CENTRE')]
@@ -78,6 +88,9 @@ class FormationController extends AbstractController {
 
     /**
      * Affiche le détail d’une formation.
+     *
+     * @param Formation $formation L'entité formation à afficher.
+     * @return Response La vue de détail de la formation.
      */
     #[Route('/{id<\d+>}', name: 'show', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
@@ -94,10 +107,16 @@ class FormationController extends AbstractController {
 
     /**
      * Modification partielle ou affichage du formulaire d’édition.
+     *
+     * @param Request $request La requête HTTP.
+     * @param Formation $formation L'entité formation à modifier.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return Response|JsonResponse La vue d'édition ou la réponse JSON après modification.
      */
     #[Route('/{id<\d+>}/edit', name: 'edit', methods: ['GET', 'PATCH'])]
     #[IsGranted('ROLE_ADMIN_CENTRE')]
     public function edit(Request $request, Formation $formation, EntityManagerInterface $em): Response | JsonResponse {
+        // Vérifie que la formation appartient bien au centre de l’utilisateur
         if ($formation->getCentre() !== $this->getUser()->getCentre()) {
             throw $this->createAccessDeniedException('Accès refusé : formation hors de votre centre.');
         }
@@ -109,7 +128,7 @@ class FormationController extends AbstractController {
         }
 
         $data = json_decode($request->getContent(), true);
-        // Ne mettez à jour que les champs présents
+        // Ne mettre à jour que les champs présents dans la requête
         foreach ([
             'titre', 'slug', 'thematique', 'niveau',
             'duree', 'tarif', 'prerequis',
@@ -143,10 +162,16 @@ class FormationController extends AbstractController {
 
     /**
      * Suppression d’une formation.
+     *
+     * @param Request $request La requête HTTP.
+     * @param Formation $formation L'entité formation à supprimer.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return Response Redirige vers la liste des formations après suppression.
      */
     #[Route('/{id<\d+>}/delete', name: 'delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN_CENTRE')]
     public function delete(Request $request, Formation $formation, EntityManagerInterface $em): Response {
+        // Vérifie que la formation appartient bien au centre de l’utilisateur
         if ($formation->getCentre() !== $this->getUser()->getCentre()) {
             throw $this->createAccessDeniedException('Accès refusé : formation hors de votre centre.');
         }
@@ -163,11 +188,15 @@ class FormationController extends AbstractController {
     }
 
     /**
-     * Détail JSON d’une formation.
+     * Détail JSON d’une formation (API).
+     *
+     * @param Formation $formation L'entité formation à retourner.
+     * @return JsonResponse Les informations de la formation au format JSON.
      */
     #[Route('/api/{id<\d+>}', name: 'api_detail', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function apiDetail(Formation $formation): JsonResponse {
+        // Vérifie que la formation appartient bien au centre de l’utilisateur
         if ($formation->getCentre() !== $this->getUser()->getCentre()) {
             throw $this->createAccessDeniedException('Accès refusé : formation hors de votre centre.');
         }

@@ -55,31 +55,50 @@
 </template>
 
 <script setup>
-import { reactive, watch, ref } from "vue";
+/**
+ * Étape 4 du wizard : sélection des participants (stagiaires).
+ *
+ * Affiche un select multiple pour choisir les participants disponibles.
+ *
+ * Props :
+ * - participantIds (Array) : IDs des participants sélectionnés.
+ *
+ * Événements :
+ * - update : émis à chaque changement de sélection.
+ */
+import { ref, reactive, onMounted, watch } from "vue";
 
 const props = defineProps({
-    modalite: { type: String, default: "présentiel" },
-    lieu: { type: String, default: "" },
+    participantIds: {
+        type: Array,
+        default: () => [],
+    },
 });
 const emit = defineEmits(["update"]);
 
-// état local pour binding
-const local = reactive({ modalite: props.modalite, lieu: props.lieu });
+// Copie locale des IDs sélectionnés
+const local = reactive({ participantIds: [...props.participantIds] });
+
+// Liste des participants disponibles
+const participants = ref([]);
 const error = ref("");
 
-// watch pour émettre et valider
+// Chargement des participants
+onMounted(async () => {
+    try {
+        const res = await fetch("/api/users?role=STAGIAIRE");
+        if (!res.ok) throw new Error("Échec du chargement des participants");
+        participants.value = await res.json();
+    } catch (e) {
+        error.value = e.message;
+    }
+});
+
+// Émettre les modifications vers le parent à chaque changement
 watch(
-    () => [local.modalite, local.lieu],
-    ([mod, lieu]) => {
-        error.value = "";
-        if (!mod) {
-            error.value = "Veuillez sélectionner une modalité.";
-        } else if (!lieu.trim()) {
-            error.value = "Le lieu est requis.";
-        }
-        emit("update", { modalite: mod, lieu });
-    },
-    { immediate: true }
+    () => local.participantIds,
+    (val) => emit("update", { participantIds: val }),
+    { deep: true, immediate: true }
 );
 </script>
 

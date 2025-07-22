@@ -93,6 +93,23 @@
 </template>
 
 <script setup>
+/**
+ * Composant d'affichage de la liste des formations.
+ *
+ * Affiche les formations sous forme de cartes, permet la recherche, l'édition rapide (admin), et la navigation vers le détail.
+ *
+ * Props :
+ * - apiUrl (String, requis) : URL d'API pour charger les formations.
+ * - newUrl (String, requis) : URL pour créer une nouvelle formation.
+ *
+ * État local :
+ * - formations : liste des formations
+ * - searchTerm : terme de recherche
+ * - editingId : id de la formation en édition
+ * - saving : état de sauvegarde
+ * - error : message d'erreur
+ * - successId : id de la formation sauvegardée avec succès
+ */
 import { ref, computed, onMounted } from "vue";
 import { Plus } from "lucide-vue-next";
 import { useAuth } from "@/composables/useAuth";
@@ -116,6 +133,9 @@ const saving = ref(false);
 const error = ref("");
 const successId = ref(null);
 
+/**
+ * Liste filtrée selon le terme de recherche.
+ */
 const filteredFormations = computed(() => {
     const term = searchTerm.value.toLowerCase();
     return formations.value.filter(
@@ -125,25 +145,44 @@ const filteredFormations = computed(() => {
     );
 });
 
+/**
+ * Retourne l'URL de détail pour une formation donnée.
+ * @param {number|string} id
+ * @returns {string}
+ */
 function getShowUrl(id) {
     return formationShowTemplate.replace("ID_PLACEHOLDER", id);
 }
 
+/**
+ * Redirige vers la page de création de formation.
+ */
 function goToNewFormation() {
     window.location.assign(props.newUrl);
 }
 
+/**
+ * Passe une formation en mode édition.
+ * @param {Object} f
+ */
 function editFormation(f) {
     editingId.value = f.id;
     error.value = "";
     successId.value = null;
 }
 
+/**
+ * Annule l'édition en cours.
+ */
 function cancelEdit() {
     editingId.value = null;
     error.value = "";
 }
 
+/**
+ * Sauvegarde les modifications d'une formation via l'API.
+ * @param {Object} f
+ */
 async function saveFormation(f) {
     saving.value = true;
     error.value = "";
@@ -170,6 +209,7 @@ async function saveFormation(f) {
     }
 }
 
+// Chargement initial des formations à l'affichage du composant
 onMounted(async () => {
     const data = await fetch(props.apiUrl).then((res) => res.json());
     formations.value = data.map((f) => ({

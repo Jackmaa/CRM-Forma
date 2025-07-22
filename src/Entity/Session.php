@@ -9,6 +9,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SessionRepository::class)]
 #[ORM\Table(name: 'sessions')]
+/**
+ * Entité représentant une session de formation (créneau, participants, formateurs, etc.).
+ */
 class Session {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -173,40 +176,68 @@ class Session {
         return $this;
     }
 
-    /** @return Collection<int, User> */
+    /**
+     * Retourne la liste des participants (stagiaires) à la session.
+     *
+     * @return Collection<int, User> Liste des utilisateurs participants.
+     */
     public function getParticipants(): Collection {
         return $this->participants;
     }
 
-    public function addParticipant(User $user): static
-    {
+    /**
+     * Ajoute un participant à la session.
+     *
+     * @param User $user Le participant à ajouter.
+     * @return static
+     */
+    public function addParticipant(User $user): static {
         if (! $this->participants->contains($user)) {
             $this->participants->add($user);
         }
         return $this;
     }
 
-    public function removeParticipant(User $user): static
-    {
+    /**
+     * Retire un participant de la session.
+     *
+     * @param User $user Le participant à retirer.
+     * @return static
+     */
+    public function removeParticipant(User $user): static {
         $this->participants->removeElement($user);
         return $this;
     }
 
-    /** @return Collection<int, User> */
+    /**
+     * Retourne la liste des formateurs associés à la session.
+     *
+     * @return Collection<int, User> Liste des formateurs.
+     */
     public function getFormateurs(): Collection {
         return $this->formateurs;
     }
 
-    public function addFormateur(User $user): static
-    {
+    /**
+     * Ajoute un formateur à la session.
+     *
+     * @param User $user Le formateur à ajouter.
+     * @return static
+     */
+    public function addFormateur(User $user): static {
         if (! $this->formateurs->contains($user)) {
             $this->formateurs->add($user);
         }
         return $this;
     }
 
-    public function removeFormateur(User $user): static
-    {
+    /**
+     * Retire un formateur de la session.
+     *
+     * @param User $user Le formateur à retirer.
+     * @return static
+     */
+    public function removeFormateur(User $user): static {
         $this->formateurs->removeElement($user);
         return $this;
     }

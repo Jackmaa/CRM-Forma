@@ -1,5 +1,5 @@
 import { startStimulusApp } from "@symfony/stimulus-bridge";
-import { registerVueControllerComponents } from "@symfony/ux-vue"; // AJOUTE CETTE LIGNE
+import { registerVueControllerComponents } from "@symfony/ux-vue";
 
 startStimulusApp(
     require.context(
@@ -9,7 +9,6 @@ startStimulusApp(
     )
 );
 
-// AJOUTE CE BLOC POUR ENREGISTRER TES COMPOSANTS VUE
 registerVueControllerComponents(
     require.context("./vue/components", true, /\.vue$/)
 );

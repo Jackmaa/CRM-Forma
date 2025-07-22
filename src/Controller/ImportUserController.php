@@ -13,8 +13,20 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur pour l'import d'utilisateurs en masse (API).
+ */
 #[Route('/api/import')]
 class ImportUserController extends AbstractController {
+    /**
+     * Importe des utilisateurs à partir d'un tableau JSON (API).
+     *
+     * @param Request $request La requête HTTP.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @param UserPasswordHasherInterface $hasher Le service de hash de mot de passe.
+     * @param CentreRepository $centreRepo Le repository des centres.
+     * @return JsonResponse Résultat de l'import (succès ou erreurs).
+     */
     #[Route('/users', name: 'import_users_csv', methods: ['POST'])]
     public function import(
         Request $request,
@@ -25,7 +37,7 @@ class ImportUserController extends AbstractController {
         $data = json_decode($request->getContent(), true);
 
         if (! is_array($data)) {
-            return $this->json(['error' => 'Invalid payload'], 400);
+            return $this->json(['error' => 'Payload invalide'], 400);
         }
 
         $currentUser = $this->getUser();
@@ -53,7 +65,6 @@ class ImportUserController extends AbstractController {
                 'email'    => $user->getEmail(),
                 'nom'      => $user->getNom(),
                 'prenom'   => $user->getPrenom(),
-
             ];
         }
 

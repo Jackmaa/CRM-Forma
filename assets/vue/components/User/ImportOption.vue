@@ -29,6 +29,19 @@
 </template>
 
 <script setup>
+/**
+ * Composant d'option d'import pour les utilisateurs (CSV, vCard, etc.).
+ *
+ * Affiche un bouton d'import avec label et gère l'événement de changement de fichier.
+ *
+ * Props :
+ * - label (String) : Libellé du bouton.
+ * - accept (String) : Types de fichiers acceptés.
+ * - inputId (String) : ID de l'input file.
+ *
+ * Événements :
+ * - change : émis lors de la sélection d'un fichier.
+ */
 import { reactive, onMounted } from "vue";
 import {
     Users as UsersIcon,

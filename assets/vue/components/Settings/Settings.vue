@@ -144,6 +144,16 @@
 </template>
 
 <script setup>
+/**
+ * Composant de gestion des paramètres utilisateur (profil, sécurité, notifications, apparence).
+ *
+ * Affiche des onglets pour modifier le profil, le mot de passe, les notifications et le thème.
+ *
+ * État local :
+ * - settings : objet réactif contenant les infos utilisateur
+ * - activeTab : onglet actif
+ * - saving : état de sauvegarde
+ */
 import { reactive, ref, onMounted } from "vue";
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
 
@@ -159,6 +169,7 @@ const settings = reactive({
 const activeTab = ref("profil");
 const saving = ref(false);
 
+// Chargement initial des paramètres utilisateur
 onMounted(async () => {
     const res = await fetch("/api/user/settings", {
         headers: { Authorization: `Bearer ${token}` },
@@ -166,6 +177,9 @@ onMounted(async () => {
     if (res.ok) Object.assign(settings, await res.json());
 });
 
+/**
+ * Réinitialise le formulaire et recharge les données depuis le serveur.
+ */
 function resetForm() {
     activeTab.value = "profil";
     settings.password = "";
@@ -173,6 +187,9 @@ function resetForm() {
     onMounted();
 }
 
+/**
+ * Sauvegarde les paramètres utilisateur via l'API.
+ */
 async function saveSettings() {
     saving.value = true;
     const payload = {

@@ -18,16 +18,27 @@
 </template>
 
 <script setup>
+/**
+ * Étape 1 du wizard : sélection de la formation.
+ *
+ * Affiche un select pour choisir la formation parmi celles disponibles.
+ *
+ * Props :
+ * - formationId (Number) : ID de la formation sélectionnée (optionnel).
+ *
+ * Événements :
+ * - update : émis à chaque changement de sélection.
+ */
 import { ref, onMounted, watch } from "vue";
 
 const props = defineProps({ formationId: Number });
 const emit = defineEmits(["update"]);
 
-// local state pour v-model
+// État local pour v-model
 const local = ref({ formationId: props.formationId });
 const formations = ref([]);
 
-// Chargement des données
+// Chargement des données de formation
 onMounted(async () => {
     try {
         formations.value = await fetch("/formation/api").then((r) => r.json());
@@ -36,7 +47,7 @@ onMounted(async () => {
     }
 });
 
-// Émettre l’update au parent
+// Émettre l'update au parent à chaque changement
 watch(
     () => local.value.formationId,
     (val) => emit("update", { formationId: val }),

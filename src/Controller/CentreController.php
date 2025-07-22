@@ -19,8 +19,17 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur pour la gestion des centres (CRUD).
+ */
 #[Route('/admin/centre')]
 class CentreController extends AbstractController {
+    /**
+     * Affiche la liste de tous les centres.
+     *
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @return Response La vue listant les centres.
+     */
     #[Route('/', name: 'centre_index', methods: ['GET'])]
     public function index(EntityManagerInterface $em): Response {
         $centres = $em->getRepository(Centre::class)->findAll();
@@ -30,6 +39,17 @@ class CentreController extends AbstractController {
         ]);
     }
 
+    /**
+     * Crée un nouveau centre et son administrateur.
+     *
+     * @param Request $request La requête HTTP.
+     * @param EntityManagerInterface $em Le gestionnaire d'entités Doctrine.
+     * @param UserPasswordHasherInterface $passwordHasher Le service de hash de mot de passe.
+     * @param MailerInterface $mailer Le service d'envoi d'emails.
+     * @param LoggerInterface $logger Le logger d'erreurs.
+     * @param string $logos_directory Le répertoire de stockage des logos.
+     * @return Response La vue du formulaire ou la redirection après succès.
+     */
     #[Route('/new', name: 'centre_new', methods: ['GET', 'POST'])]
     public function new (
         Request $request,
@@ -44,7 +64,7 @@ class CentreController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // 1) upload du logo (avant transaction)
+            // 1) Upload du logo (avant transaction)
             /** @var UploadedFile|null $file */
             $file = $form->get('logoFile')->getData();
             if ($file instanceof UploadedFile) {
@@ -53,17 +73,17 @@ class CentreController extends AbstractController {
                 $centre->setLogoUrl('uploads/logos/' . $filename);
             }
 
-            // 2) génération du mot de passe en clair
+            // 2) Génération du mot de passe en clair
             $plainPassword = rtrim(strtr(base64_encode(random_bytes(6)), '+/', '-_'), '=');
 
-            // 3) démarrage de la transaction DBAL
+            // 3) Démarrage de la transaction DBAL
             $conn = $em->getConnection();
             $conn->beginTransaction();
             try {
-                // persist du Centre
+                // Persiste le Centre
                 $em->persist($centre);
 
-                // création de l'utilisateur ADMIN_CENTRE
+                // Création de l'utilisateur ADMIN_CENTRE
                 $user = new User();
                 $user->setEmail($centre->getEmail());
                 $user->setRole(UserRole::ADMIN_CENTRE);
@@ -71,17 +91,17 @@ class CentreController extends AbstractController {
                 $user->setPrenom('Admin');
                 $user->setCentre($centre);
 
-                // hash du mot de passe
+                // Hash du mot de passe
                 $hashed = $passwordHasher->hashPassword($user, $plainPassword);
                 $user->setPassword($hashed);
 
                 $em->persist($user);
 
-                // flush + commit
+                // Flush + commit
                 $em->flush();
                 $conn->commit();
 
-                // 4) envoi de l’email en dehors de la transaction
+                // 4) Envoi de l’email en dehors de la transaction
                 $message = (new Email())
                     ->from(new Address('no-reply@votre-domaine.tld', 'Support'))
                     ->to($centre->getEmail())
@@ -102,7 +122,7 @@ class CentreController extends AbstractController {
                 $conn->rollBack();
                 $logger->error('Erreur création centre/admin : ' . $e->getMessage());
                 $this->addFlash('error', 'Une erreur est survenue lors de la création du centre.');
-                // on retombe sur le formulaire
+                // On retombe sur le formulaire
             }
         }
 

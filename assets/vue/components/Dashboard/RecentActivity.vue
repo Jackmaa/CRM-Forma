@@ -48,6 +48,16 @@
 </template>
 
 <script setup>
+/**
+ * Composant d'affichage des activités récentes du CRM.
+ *
+ * Affiche un loader, gère les erreurs, et liste les activités avec animation.
+ *
+ * Données internes :
+ * - items : liste des activités récentes
+ * - loading : état de chargement
+ * - error : message d'erreur éventuel
+ */
 import { ref, onMounted } from "vue";
 import {
     Trash2 as DeleteIcon,
@@ -59,6 +69,11 @@ const items = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
+/**
+ * Calcule le temps relatif (ex: "il y a 2 min") à partir d'une date ISO.
+ * @param {string} isoDate
+ * @returns {string}
+ */
 function relativeTime(isoDate) {
     const delta = (Date.now() - new Date(isoDate)) / 1000;
     if (delta < 60) return "À l’instant";
@@ -67,6 +82,11 @@ function relativeTime(isoDate) {
     return `${Math.floor(delta / 86400)} j`;
 }
 
+/**
+ * Retourne le composant d'icône à utiliser selon l'action.
+ * @param {string} action
+ * @returns {object}
+ */
 function getIconComponent(action) {
     switch (action) {
         case "delete":
@@ -78,6 +98,7 @@ function getIconComponent(action) {
     }
 }
 
+// Chargement des activités récentes à l'initialisation du composant
 onMounted(async () => {
     try {
         const res = await fetch("/api/recent-activities", {

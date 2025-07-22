@@ -26,29 +26,48 @@ class ActivitySubscriber implements EventSubscriber {
             Events::postFlush,
         ];
     }
-
+    /**
+     * Méthode appelée après la persistance d'une entité.
+     *
+     * @param LifecycleEventArgs $args Les arguments de l'événement.
+     */
     public function postPersist(LifecycleEventArgs $args): void {
         $this->logger->info('ActivitySubscriber postPersist for ' . get_class($args->getObject()));
         $this->collect('create', $args);
     }
 
+    /**
+     * Méthode appelée après la mise à jour d'une entité.
+     *
+     * @param LifecycleEventArgs $args Les arguments de l'événement.
+     */
     public function postUpdate(LifecycleEventArgs $args): void {
         $this->logger->info('ActivitySubscriber postUpdate for ' . get_class($args->getObject()));
         $this->collect('update', $args);
     }
 
+    /**
+     * Méthode appelée avant la suppression d'une entité.
+     *
+     * @param LifecycleEventArgs $args Les arguments de l'événement.
+     */
     public function preRemove(LifecycleEventArgs $args): void {
         $this->logger->info('ActivitySubscriber postRemove for ' . get_class($args->getObject()));
         $this->collect('delete', $args);
     }
 
+    /**
+     * Collecte les informations d'activité pour l'entité donnée.
+     *
+     * @param string $action L'action effectuée (create, update, delete).
+     * @param LifecycleEventArgs $args Les arguments de l'événement.
+     */
     private function collect(string $action, LifecycleEventArgs $args): void {
         $entity = $args->getObject();
         // N’enregistre pas les Activity elles-mêmes
         if ($entity instanceof Activity) {
             return;
         }
-
         $em   = $args->getObjectManager();
         $meta = $em->getClassMetadata(\get_class($entity));
         $ids  = $meta->getIdentifierValues($entity);
@@ -77,6 +96,13 @@ class ActivitySubscriber implements EventSubscriber {
         $this->toRecord[] = $activity;
     }
 
+    /**
+     * Méthode appelée après le flush de Doctrine.
+     *
+     * Enregistre toutes les activités collectées dans la base de données.
+     *
+     * @param PostFlushEventArgs $args Les arguments de l'événement.
+     */
     public function postFlush(PostFlushEventArgs $args): void {
         $this->logger->info('ActivitySubscriber postFlush, toRecord count = ' . count($this->toRecord));
         if (empty($this->toRecord)) {

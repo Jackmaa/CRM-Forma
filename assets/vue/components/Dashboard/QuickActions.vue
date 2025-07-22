@@ -27,15 +27,30 @@
 </template>
 
 <script setup>
+/**
+ * Composant d'affichage des actions rapides du dashboard.
+ *
+ * Affiche deux boutons principaux :
+ * - Nouveau devis (non implémenté)
+ * - Planifier une formation (ouvre un wizard)
+ *
+ * Gère l'ouverture/fermeture du wizard via un modal DaisyUI.
+ */
 import { ref } from "vue";
 import SessionWizard from "../Session/SessionWizard.vue";
 
 const showWizard = ref(false);
 
+/**
+ * Ouvre le wizard de planification de formation.
+ */
 function openWizard() {
     showWizard.value = true;
 }
 
+/**
+ * Ferme le wizard de planification de formation.
+ */
 function closeWizard() {
     showWizard.value = false;
 }

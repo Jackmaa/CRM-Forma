@@ -15,6 +15,15 @@
 </template>
 
 <script setup>
+/**
+ * Composant d'affichage d'une statistique clé du dashboard.
+ *
+ * Props :
+ * - label (String, requis) : Libellé de la statistique.
+ * - value (String|Number, requis) : Valeur à afficher.
+ *
+ * Utilise un slot nommé "icon" pour afficher une icône décorative.
+ */
 const props = defineProps({
     label: { type: String, required: true },
     value: { type: [String, Number], required: true },

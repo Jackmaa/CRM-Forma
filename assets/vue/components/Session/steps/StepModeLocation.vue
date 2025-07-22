@@ -55,6 +55,18 @@
 </template>
 
 <script setup>
+/**
+ * Étape 5 du wizard : choix de la modalité et du lieu.
+ *
+ * Affiche des boutons radio pour la modalité (présentiel, distanciel, hybride) et un champ texte pour le lieu.
+ *
+ * Props :
+ * - modalite (String) : modalité sélectionnée.
+ * - lieu (String) : lieu saisi.
+ *
+ * Événements :
+ * - update : émis à chaque changement.
+ */
 import { reactive, watch, ref } from "vue";
 
 const props = defineProps({
@@ -63,11 +75,11 @@ const props = defineProps({
 });
 const emit = defineEmits(["update"]);
 
-// état local pour binding
+// État local pour binding
 const local = reactive({ modalite: props.modalite, lieu: props.lieu });
 const error = ref("");
 
-// watch pour émettre et valider
+// Watch pour émettre et valider à chaque changement
 watch(
     () => [local.modalite, local.lieu],
     ([mod, lieu]) => {
