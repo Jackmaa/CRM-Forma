@@ -90,8 +90,75 @@
                 <template v-if="editingId === user.id">
                     <!-- édition : visible uniquement aux admins -->
                     <div v-if="isAdmin" class="space-y-2">
-                        <!-- champs éditables… -->
+                        <!-- Prénom -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Prénom</span>
+                            </label>
+                            <input
+                                v-model="user.prenom"
+                                type="text"
+                                class="input input-bordered w-full"
+                            />
+                        </div>
+
+                        <!-- Nom -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Nom</span>
+                            </label>
+                            <input
+                                v-model="user.nom"
+                                type="text"
+                                class="input input-bordered w-full"
+                            />
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Email</span>
+                            </label>
+                            <input
+                                v-model="user.email"
+                                type="email"
+                                class="input input-bordered w-full"
+                            />
+                        </div>
+
+                        <!-- Rôle -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Rôle</span>
+                            </label>
+                            <select
+                                v-model="user.role"
+                                class="select select-bordered w-full"
+                            >
+                                <option
+                                    v-for="opt in roleOptions"
+                                    :key="opt.value"
+                                    :value="opt.value"
+                                >
+                                    {{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Actif -->
+                        <div class="form-control">
+                            <label class="label cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    v-model="user.isActive"
+                                    class="checkbox checkbox-primary"
+                                />
+                                <span class="label-text ml-2">Actif</span>
+                            </label>
+                        </div>
                     </div>
+
+                    <!-- boutons Enregistrer / Annuler -->
                     <div v-if="isAdmin" class="flex justify-end space-x-2 mt-4">
                         <button
                             @click="saveUser(user)"
