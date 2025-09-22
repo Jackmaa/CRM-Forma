@@ -14,11 +14,28 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        # 🔐 Auth JSON pour obtenir un token JWT
+        login:
+            pattern: ^/api/login$
+            stateless: true
+            json_login:
+                check_path: /api/login
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        # 🔐 Protections JWT pour toutes les routes /api (sauf /api/login)
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+
+        # 🔓 Auth formulaire existante (site Twig)
         main:
             pattern: ^/
             lazy: true
             provider: app_user_provider
-
             form_login:
                 login_path: app_login
                 check_path: app_login
@@ -30,11 +47,15 @@ security:
             logout:
                 path: app_logout
                 target: app_login
-
             remember_me:
                 secret: "%kernel.secret%"
                 lifetime: 604800
                 path: /
 
-    # access_control:
-    #     - { path: /admin/*, roles: ROLE_ADMIN_CENTRE }
+    access_control:
+        # Autoriser l'accès public au point d'obtention du token
+        - { path: ^/api/login$, roles: PUBLIC_ACCESS }
+        # Tout le reste de /api nécessite un JWT valide
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        # Exemple si tu veux réserver /admin/* :
+        # - { path: ^/admin, roles: ROLE_ADMIN }
