@@ -1,12 +1,15 @@
 // assets/vue/composables/useAuth.js
-import { computed } from "vue";
-
 export function useAuth() {
-    // on lit la variable initialisée dans votre <head> Twig
-    const roles = window.APP_USER_ROLES || [];
+    // on lit la variable initialisée dans le <head> Twig
+    const roles = Array.isArray(window.APP_USER_ROLES)
+        ? window.APP_USER_ROLES
+        : [];
+    const has = (r) => roles.includes(r);
 
-    const isStagiaire = computed(() => roles.includes("ROLE_STAGIAIRE"));
-    const isAdmin = computed(() => roles.includes("ROLE_ADMIN_CENTRE"));
-
-    return { roles, isStagiaire, isAdmin };
+    return {
+        roles,
+        isStagiaire: has("ROLE_STAGIAIRE"),
+        // tolérant: accepte ROLE_ADMIN_CENTRE ou ROLE_ADMIN
+        isAdmin: has("ROLE_ADMIN_CENTRE") || has("ROLE_ADMIN"),
+    };
 }

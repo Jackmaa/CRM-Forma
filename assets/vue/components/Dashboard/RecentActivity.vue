@@ -64,6 +64,7 @@ import {
     PlusCircle as CreateIcon,
     Edit2 as EditIcon,
 } from "lucide-vue-next";
+import { apiFetch } from "../../utils/apiFetch";
 
 const items = ref([]);
 const loading = ref(true);
@@ -101,11 +102,10 @@ function getIconComponent(action) {
 // Chargement des activités récentes à l'initialisation du composant
 onMounted(async () => {
     try {
-        const res = await fetch("/api/recent-activities", {
+        const data = await apiFetch("/recent-activities", {
             headers: { Accept: "application/json" },
         });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+
         items.value = data.map((a) => ({
             id: a.id,
             action: a.action,
@@ -114,7 +114,10 @@ onMounted(async () => {
         }));
     } catch (e) {
         console.error(e);
-        error.value = "Impossible de charger les activités.";
+        error.value =
+            e?.message === "Non authentifié"
+                ? "Votre session a expiré. Veuillez vous reconnecter."
+                : "Impossible de charger les activités.";
     } finally {
         loading.value = false;
     }

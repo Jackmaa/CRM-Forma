@@ -171,7 +171,7 @@ const saving = ref(false);
 
 // Chargement initial des paramètres utilisateur
 onMounted(async () => {
-    const res = await fetch("/api/user/settings", {
+    const res = await apiFetch("/user/settings", {
         headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) Object.assign(settings, await res.json());

@@ -218,7 +218,6 @@ onMounted(async () => {
         description: f.description,
     }));
 });
-console.log("Is stagiaire:", isStagiaire.value);
 </script>
 
 <style scoped>

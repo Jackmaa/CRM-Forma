@@ -55,6 +55,8 @@ security:
     access_control:
         # Autoriser l'accès public au point d'obtention du token
         - { path: ^/api/login$, roles: PUBLIC_ACCESS }
+
+        - { path: ^/auth/jwt$, roles: IS_AUTHENTICATED_FULLY }
         # Tout le reste de /api nécessite un JWT valide
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         # Exemple si tu veux réserver /admin/* :
