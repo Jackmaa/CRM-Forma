@@ -59,3 +59,38 @@ export async function apiFetch(pathOrUrl, options = {}) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res;
 }
+// Normalize apiFetch return:
+// - if apiFetch returned a Response (e.g., 204 No Content), give back null
+// - if it returned parsed JSON, keep it as-is
+const unwrap = (r) =>
+    r && typeof r === "object" && "ok" in r && "headers" in r ? null : r;
+
+// Convenience helpers
+export const getJson = (u, opt = {}) =>
+    apiFetch(u, { ...opt, method: "GET" }).then(unwrap);
+
+export const postJson = (u, body, opt = {}) =>
+    apiFetch(u, {
+        ...opt,
+        method: "POST",
+        // keep FormData as-is, JSONify plain objects
+        body: body instanceof FormData ? body : JSON.stringify(body),
+    }).then(unwrap);
+
+export const patchJson = (u, body, opt = {}) =>
+    apiFetch(u, {
+        ...opt,
+        method: "PATCH",
+        body: body instanceof FormData ? body : JSON.stringify(body),
+    }).then(unwrap);
+
+// (optional but handy)
+export const putJson = (u, body, opt = {}) =>
+    apiFetch(u, {
+        ...opt,
+        method: "PUT",
+        body: body instanceof FormData ? body : JSON.stringify(body),
+    }).then(unwrap);
+
+export const deleteJson = (u, opt = {}) =>
+    apiFetch(u, { ...opt, method: "DELETE" }).then(unwrap);
