@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}CRM{% endblock %}</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-issue-jwt" content="{{ csrf_token('issue_jwt') }}">
     <script src="https://cdn.tailwindcss.com"></script>
   {% if app.user %}
