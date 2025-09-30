@@ -1,12 +1,11 @@
-{# templates/base.html.twig #}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}CRM{% endblock %}</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-
+  <meta name="csrf-issue-jwt" content="{{ csrf_token('issue_jwt') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
   {% if app.user %}
     <script>
       window.APP_USER_ROLES = {{ app.user.roles|json_encode|raw }};
@@ -14,6 +13,34 @@
   {% else %}
     <script>window.APP_USER_ROLES = [];</script>
   {% endif %}
+  {# Bootstrap JWT : définit window.awaitJwt AVANT l'app #}
+  <script>
+    window.awaitJwt = (async () => {
+      try {
+        if (localStorage.getItem('jwt_token')) return;
+        const meta = document.querySelector('meta[name="csrf-issue-jwt"]');
+        if (!meta) return;
+
+        const res = await fetch('/auth/jwt', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': meta.content,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin'
+        });
+
+        if (!res.ok) {
+          console.warn('/auth/jwt status:', res.status);
+          return;
+        }
+        const data = await res.json();
+        if (data?.token) localStorage.setItem('jwt_token', data.token);
+      } catch (e) {
+        console.warn('JWT bootstrap failed:', e);
+      }
+    })();
+  </script>
 
   {% block stylesheets %}
     {{ encore_entry_link_tags('app') }}
@@ -24,22 +51,6 @@
   <main class="flex-1 p-4">
     {% block body %}{% endblock %}
   </main>
-  <script type="module">
-    (async () => {
-      try {
-        if (localStorage.getItem('jwt_token')) return;
-        const meta = document.querySelector('meta[name="csrf-issue-jwt"]');
-        if (!meta) return;
-        const res = await fetch('/auth/jwt', {
-          method: 'POST',
-          headers: { 'X-CSRF-TOKEN': meta.content, 'X-Requested-With': 'XMLHttpRequest' }
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data?.token) localStorage.setItem('jwt_token', data.token);
-      } catch(e){ console.warn('JWT non récupéré:', e); }
-    })();
-  </script>
 
   {% block javascripts %}
     {{ encore_entry_script_tags('app') }}
