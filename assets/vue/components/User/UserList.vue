@@ -240,6 +240,8 @@ import { Plus } from "lucide-vue-next";
 import ImportOption from "./ImportOption.vue";
 import { useAuth } from "@/composables/useAuth";
 import { apiFetch } from "@/utils/apiFetch";
+import { patchJson } from "@/utils/apiFetch";
+import { postJson } from "@/utils/apiFetch";
 
 const { isAdmin } = useAuth();
 
@@ -316,26 +318,13 @@ async function saveUser(userId) {
         const payload = { ...editBuffer.value };
         const url = userApiDetailTpl.replace("ID_PLACEHOLDER", userId);
 
-        const res = await apiFetch(url, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
+        // ⬇️ data = ce que renvoie ton API (ou undefined si 204)
+        const data = await patchJson(url, payload);
+        const updated = data ?? payload; // fallback si 204 No Content
 
-        if (!res.ok) {
-            let msg = "Erreur lors de la sauvegarde";
-            try {
-                const j = await res.json();
-                if (j?.message) msg = j.message;
-            } catch {}
-            throw new Error(msg);
-        }
-
-        // MàJ locale de l’utilisateur
         const idx = users.value.findIndex((u) => u.id === userId);
-        if (idx !== -1) {
-            users.value[idx] = { ...users.value[idx], ...payload };
-        }
+        if (idx !== -1) users.value[idx] = { ...users.value[idx], ...updated };
+
         successId.value = userId;
         editingId.value = null;
         editBuffer.value = null;
@@ -377,22 +366,10 @@ function parseVCF(raw) {
 async function importUsers(payload) {
     if (!isAdmin || !Array.isArray(payload) || !payload.length) return;
     try {
-        const res = await apiFetch(importEndpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ users: payload }),
-        });
+        // Le contrôleur peut renvoyer { users: [...] } ou directement un tableau
+        const result = await postJson(importEndpoint, { users: payload });
+        const imported = Array.isArray(result) ? result : result?.users || [];
 
-        if (!res.ok) {
-            let msg = "Import échoué";
-            try {
-                const j = await res.json();
-                if (j?.message) msg = j.message;
-            } catch {}
-            throw new Error(msg);
-        }
-
-        const { users: imported = [] } = await res.json();
         imported.forEach((u) => {
             users.value.push({
                 id: u.id,

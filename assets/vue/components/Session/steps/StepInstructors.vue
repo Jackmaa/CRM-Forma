@@ -36,6 +36,7 @@
  * - update : émis à chaque changement de sélection.
  */
 import { ref, reactive, onMounted, watch } from "vue";
+import { getJson } from "@/utils/apiFetch";
 
 const props = defineProps({
     formateurIds: {
@@ -55,11 +56,13 @@ const error = ref("");
 // Chargement des formateurs
 onMounted(async () => {
     try {
-        const res = await fetch("/api/users?role=FORMATEUR");
-        if (!res.ok) throw new Error("Échec du chargement des formateurs");
-        instructors.value = await res.json();
+        const data = await getJson("/users?role=FORMATEUR");
+        const list = Array.isArray(data)
+            ? data
+            : data?.users ?? data?.["hydra:member"] ?? [];
+        instructors.value = list;
     } catch (e) {
-        error.value = e.message;
+        error.value = e?.message || "Échec du chargement des formateurs";
     }
 });
 

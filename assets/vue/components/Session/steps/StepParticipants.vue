@@ -1,56 +1,25 @@
 <template>
-    <div class="space-y-4">
-        <!-- Choix de la modalité -->
-        <div class="form-control">
-            <label class="label">
-                <span class="label-text text-base-content">Modalité</span>
-            </label>
-            <div class="flex space-x-6">
-                <label class="label cursor-pointer flex items-center space-x-2">
-                    <input
-                        type="radio"
-                        v-model="local.modalite"
-                        value="présentiel"
-                        class="radio radio-primary"
-                    />
-                    <span class="label-text text-base-content">Présentiel</span>
-                </label>
-                <label class="label cursor-pointer flex items-center space-x-2">
-                    <input
-                        type="radio"
-                        v-model="local.modalite"
-                        value="distanciel"
-                        class="radio radio-primary"
-                    />
-                    <span class="label-text text-base-content">Distanciel</span>
-                </label>
-                <label class="label cursor-pointer flex items-center space-x-2">
-                    <input
-                        type="radio"
-                        v-model="local.modalite"
-                        value="hybride"
-                        class="radio radio-primary"
-                    />
-                    <span class="label-text text-base-content">Hybride</span>
-                </label>
-            </div>
-        </div>
-
-        <!-- Saisie du lieu -->
-        <div class="form-control">
-            <label class="label">
-                <span class="label-text text-base-content">Lieu</span>
-            </label>
-            <input
-                v-model="local.lieu"
-                type="text"
-                placeholder="Entrez le lieu de la session"
-                class="input input-bordered w-full"
-            />
-        </div>
-
-        <!-- Message d'erreur -->
-        <p v-if="error" class="text-error mt-1">{{ error }}</p>
+    <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700"
+            >Stagiaires</label
+        >
+        <select
+            v-model="local.participantIds"
+            multiple
+            class="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring focus:border-blue-300 h-32"
+        >
+            <option
+                v-for="participant in participants"
+                :key="participant.id"
+                :value="participant.id"
+            >
+                {{
+                    participant.fullname ||
+                    `${participant.prenom} ${participant.nom}`
+                }}
+            </option>
+        </select>
+        <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
     </div>
 </template>
 
@@ -67,6 +36,7 @@
  * - update : émis à chaque changement de sélection.
  */
 import { ref, reactive, onMounted, watch } from "vue";
+import { getJson } from "@/utils/apiFetch";
 
 const props = defineProps({
     participantIds: {
@@ -86,11 +56,13 @@ const error = ref("");
 // Chargement des participants
 onMounted(async () => {
     try {
-        const res = await fetch("/api/users?role=STAGIAIRE");
-        if (!res.ok) throw new Error("Échec du chargement des participants");
-        participants.value = await res.json();
+        const data = await getJson("/users?role=STAGIAIRE");
+        const list = Array.isArray(data)
+            ? data
+            : data?.users ?? data?.["hydra:member"] ?? [];
+        participants.value = list;
     } catch (e) {
-        error.value = e.message;
+        error.value = e?.message || "Échec du chargement des stagiaires";
     }
 });
 

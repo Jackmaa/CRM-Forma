@@ -40,4 +40,13 @@ class CentreRepository extends ServiceEntityRepository {
     public function findBySiret(string $siret): ?Centre {
         return $this->findOneBy(['siret' => $siret]);
     }
+
+    public function findByCentre(Centre $centre): array {
+        return $this->createQueryBuilder('s')
+            ->join('s.formation', 'f')->addSelect('f')
+            ->andWhere('f.centre = :c')->setParameter('c', $centre)
+            ->orderBy('s.dateDebut', 'DESC')
+            ->getQuery()->getResult();
+
+    }
 }
