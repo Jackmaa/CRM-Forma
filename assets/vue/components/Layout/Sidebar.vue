@@ -1,7 +1,7 @@
 <template>
     <aside
         :class="[
-            'flex flex-col justify-between transition-all duration-300 ease-in-out h-screen px-2 bg-base-200',
+            'flex flex-col justify-between transition-all duration-300 ease-in-out h-screen  bg-base-200 overflow-x-hidden',
             isCollapsed ? 'w-16' : 'w-64',
         ]"
     >
@@ -21,7 +21,7 @@
 
             <!-- Logo / Title -->
             <h1
-                class="font-bold mb-6 text-lg transition-opacity duration-300 text-base-content"
+                class="font-bold mb-6 text-lg transition-opacity duration-300 text-base-content px-2"
                 :class="isCollapsed ? 'opacity-0' : 'opacity-100'"
             >
                 CRM Formation

@@ -4,22 +4,25 @@
         <a
             :href="to"
             :class="[
-                'flex items-center p-2 rounded-lg transition-colors',
+                'relative flex items-center h-10 rounded-lg transition-colors w-full',
                 active
                     ? 'bg-primary text-primary-content'
                     : 'hover:bg-base-300 text-base-content',
-                collapsed ? 'justify-center gap-0' : 'justify-start gap-3',
+                collapsed
+                    ? '!justify-center px-0 gap-0'
+                    : 'justify-start px-2 gap-3',
             ]"
         >
             <!-- Icône dynamique basée sur le nom passé en prop -->
-            <component :is="IconComponent" class="w-5 h-5" />
+            <component :is="IconComponent" class="w-5 h-5 shrink-0" />
             <span
                 v-if="!collapsed"
-                class="ml-2 transition-opacity duration-300"
+                class="ml-2 transition-opacity duration-300 truncate"
             >
                 {{ label }}
             </span>
-            <slot name="append" />
+            <!-- cache le badge quand collapsed pour éviter tout débordement -->
+            <slot v-if="!collapsed" name="append" />
         </a>
     </li>
 </template>
