@@ -26,6 +26,8 @@
             :steps="steps"
             @update="onStepUpdate"
             @edit-step="currentStep = $event"
+            @update:dateDebut="wizardData.dateDebut = $event"
+            @update:dateFin="wizardData.dateFin = $event"
             class="mb-6"
         />
 
@@ -58,26 +60,7 @@
 </template>
 
 <script setup>
-/**
- * Composant wizard multi-étapes pour la création d'une session de formation.
- *
- * Affiche une barre de progression, gère la navigation entre les étapes, collecte les données et soumet la session à l'API.
- *
- * Étapes :
- * - Formation
- * - Dates
- * - Formateurs
- * - Participants
- * - Mode & Lieu
- * - Récapitulatif
- *
- * État local :
- * - currentStep : index de l'étape courante
- * - wizardData : données collectées à chaque étape
- * - submitting : état d'envoi
- * - error : message d'erreur
- */
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, computed, watch } from "vue";
 import StepFormation from "./steps/StepFormation.vue";
 import StepSchedule from "./steps/StepSchedule.vue";
 import StepInstructors from "./steps/StepInstructors.vue";
@@ -98,10 +81,11 @@ const currentStep = ref(0);
 const submitting = ref(false);
 const error = ref("");
 
-const wizardData = reactive({
+const STORAGE_KEY = "session_wizard_draft_v1";
+const defaults = () => ({
     formationId: null,
-    dateDebut: null,
-    dateFin: null,
+    dateDebut: "", // ← ISO string
+    dateFin: "", // ← ISO string
     formateurIds: [],
     participantIds: [],
     modalite: "présentiel",
@@ -109,47 +93,83 @@ const wizardData = reactive({
     remarques: "",
 });
 
+function loadDraft() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaults();
+        return { ...defaults(), ...JSON.parse(raw) };
+    } catch {
+        return defaults();
+    }
+}
+
+const wizardData = reactive(loadDraft());
+
+// autosave (debounce léger)
+let t = null;
+watch(
+    wizardData,
+    () => {
+        clearTimeout(t);
+        t = setTimeout(() => {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(wizardData));
+        }, 150);
+    },
+    { deep: true }
+);
+
+function resetDraft() {
+    Object.assign(wizardData, defaults());
+    localStorage.removeItem(STORAGE_KEY);
+}
+
 const isLast = computed(() => currentStep.value === steps.length - 1);
 
-/**
- * Met à jour les données du wizard à chaque étape.
- * @param {Object} payload
- */
+// Les Steps t'envoient { ... } via @update
 function onStepUpdate(payload) {
     Object.assign(wizardData, payload);
 }
 
-/**
- * Passe à l'étape suivante.
- */
 function next() {
     error.value = "";
-    currentStep.value++;
+    if (currentStep.value < steps.length - 1) currentStep.value++;
 }
-
-/**
- * Revient à l'étape précédente.
- */
 function prev() {
-    currentStep.value--;
+    if (currentStep.value > 0) currentStep.value--;
 }
 
-/**
- * Soumet la session à l'API à la dernière étape.
- */
+// ---- Soumission ----
+// Conserve tes clés back existantes: formation, formateur_responsable...
 async function submit() {
     submitting.value = true;
     error.value = "";
+
+    // garde-fous dates
+    if (!wizardData.dateDebut || !wizardData.dateFin) {
+        error.value = "Dates requises.";
+        submitting.value = false;
+        return;
+    }
+    if (new Date(wizardData.dateFin) <= new Date(wizardData.dateDebut)) {
+        error.value =
+            "La date de fin doit être postérieure à la date de début.";
+        submitting.value = false;
+        return;
+    }
+
     const payload = {
         formation: wizardData.formationId,
         formateur_responsable: wizardData.formateurIds[0] || null,
-        dateDebut: wizardData.dateDebut,
-        dateFin: wizardData.dateFin,
+        dateDebut: wizardData.dateDebut, // ISO
+        dateFin: wizardData.dateFin, // ISO
         modalite: wizardData.modalite,
         lieu: wizardData.lieu,
         remarques: wizardData.remarques || null,
+        participants: wizardData.participantIds ?? [], // si le back l'accepte
     };
+
     try {
+        // Si ton endpoint est bien "/session/api" (côté web), garde fetch :
         const res = await fetch("/session/api", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -157,12 +177,18 @@ async function submit() {
         });
         const result = await res.json();
         if (!res.ok) {
-            error.value = Object.values(result).flat().join("\n");
+            // agrège erreurs renvoyées par Symfony
+            error.value = Array.isArray(result)
+                ? result.join("\n")
+                : Object.values(result || {})
+                      .flat()
+                      .join("\n") || "Erreur de validation.";
             return;
         }
+        resetDraft();
         window.location.href = `/session/${result.id}`;
     } catch (e) {
-        error.value = e.message || "Erreur lors de la création";
+        error.value = e?.message || "Erreur lors de la création";
     } finally {
         submitting.value = false;
     }

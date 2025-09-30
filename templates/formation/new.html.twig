@@ -1,16 +1,15 @@
-{# templates/formation/new.html.twig #}
 {% extends 'base.html.twig' %}
-
 {% block title %}Créer une formation{% endblock %}
 
+{# ⬇️ applique le thème Tailwind/DaisyUI de tes forms #}
+{% form_theme form 'forms/tailwind_form_theme.html.twig' %}
+
 {% block body %}
-  <div class="max-w-3xl mx-auto p-6 bg-white shadow rounded">
+  <div class="max-w-3xl mx-auto p-6 bg-base-100 text-base-content shadow rounded">
 
     <h1 class="text-2xl font-semibold mb-4">Nouvelle formation</h1>
 
-    {{ form_start(form,{
-    'action': path('formation_new'),
-    'method': 'POST'}) }}
+    {{ form_start(form, { action: path('formation_new'), method: 'POST' }) }}
 
       {{ form_row(form.titre) }}
       {{ form_row(form.slug) }}
@@ -19,87 +18,110 @@
 
       {# ---------- MODALITÉS ---------- #}
       <h2 class="mt-6 font-medium">Modalités pédagogiques</h2>
-      <div id="modalites-collection"
-           data-prototype="{{ form_widget(form.modalites.vars.prototype)|e('html_attr') }}">
-        {# champs préexistants (utile en édition) #}
+      <div
+        id="modalites-collection"
+        data-prototype="{{ form_row(form.modalites.vars.prototype)|e('html_attr') }}"
+        data-index="{{ form.modalites|length > 0 ? form.modalites|length : 0 }}"
+      >
         {% for child in form.modalites %}
           <div class="collection-item mb-2 flex items-center">
-            {{ form_widget(child, {'attr': {'class': 'flex-1'}}) }}
-            <button type="button" class="remove-item ml-2 text-red-500">✕</button>
+            {{ form_widget(child) }}
+            <button type="button" class="remove-item ml-2 btn btn-sm btn-ghost text-error">✕</button>
           </div>
         {% endfor %}
       </div>
-      <button type="button" id="add-modalite"
-              class="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded">
-        + Ajouter une modalité
-      </button>
-
+      <button type="button" id="add-modalite" class="mt-2 btn btn-sm btn-primary">+ Ajouter une modalité</button>
+      {% do form.modalites.setRendered %}
       {# ---------- OBJECTIFS ---------- #}
       <h2 class="mt-6 font-medium">Objectifs pédagogiques</h2>
-      <div id="objectifs-collection"
-           data-prototype="{{ form_widget(form.objectifs.vars.prototype)|e('html_attr') }}">
+      <div
+        id="objectifs-collection"
+        data-prototype="{{ form_row(form.objectifs.vars.prototype)|e('html_attr') }}"
+        data-index="{{ form.objectifs|length > 0 ? form.objectifs|length : 0 }}"
+      >
         {% for child in form.objectifs %}
           <div class="collection-item mb-2 flex items-center">
-            {{ form_widget(child, {'attr': {'class': 'flex-1'}}) }}
-            <button type="button" class="remove-item ml-2 text-red-500">✕</button>
+            {{ form_widget(child) }}
+            <button type="button" class="remove-item ml-2 btn btn-sm btn-ghost text-error">✕</button>
           </div>
         {% endfor %}
       </div>
-      <button type="button" id="add-objectif"
-              class="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded">
-        + Ajouter un objectif
-      </button>
-
+      <button type="button" id="add-objectif" class="mt-2 btn btn-sm btn-primary">+ Ajouter un objectif</button>
+      {% do form.objectifs.setRendered %}
       {{ form_row(form.prerequis) }}
+
       {{ form_row(form.duree) }}
       {{ form_row(form.tarif) }}
       {{ form_row(form.description) }}
 
-      <div class="mt-6">
-        <button type="submit" class="ml-2 px-4 py-2 bg-gray-300 text-gray-800 rounded">
-          Enregistrer
-        </button>
+      <div class="mt-6 flex justify-end">
+        <button type="submit" class="btn btn-success">Enregistrer</button>
       </div>
 
-{{ form_end(form) }}
-
+    {{ form_end(form) }}
   </div>
 {% endblock %}
 
 {% block javascripts %}
   {{ parent() }}
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Générique : ajoute un nouvel item dans la collection
-      function addItem(collectionId) {
-        const container = document.getElementById(collectionId);
-        const prototype = container.getAttribute('data-prototype');
-        const index = container.querySelectorAll('.collection-item').length;
-        // remplace __name__ par l'index
-        const newForm = prototype.replace(/__name__/g, index);
+  (function(){
+    function decodeHtml(s){
+      var t=document.createElement('textarea'); t.innerHTML=s; return t.value;
+    }
+    function hookCollection(rootId, addBtnId){
+      var container=document.getElementById(rootId);
+      if(!container) return;
 
-        const wrapper = document.createElement('div');
-        wrapper.classList.add('collection-item', 'mb-2', 'flex', 'items-center');
-        wrapper.innerHTML = newForm +
-          '<button type="button" class="remove-item ml-2 text-red-500">✕</button>';
+      var proto = container.dataset.prototype || '';
+      if(!proto){
+        console.warn('['+rootId+'] data-prototype manquant');
+        return;
+      }
+      if(proto.indexOf('&lt;')!==-1) proto = decodeHtml(proto);
 
-        container.appendChild(wrapper);
+      if(!container.dataset.index){
+        container.dataset.index = String(container.querySelectorAll('.collection-item').length || 0);
       }
 
-      // Ajout Modalité
-      document.getElementById('add-modalite')
-        .addEventListener('click', () => addItem('modalites-collection'));
+      function add(){
+        var index = parseInt(container.dataset.index || '0', 10);
+        var html = proto
+          .replace(/__name__label__/g, 'Élément '+(index+1))
+          .replace(/__name__/g, index);
 
-      // Ajout Objectif
-      document.getElementById('add-objectif')
-        .addEventListener('click', () => addItem('objectifs-collection'));
+        container.insertAdjacentHTML('beforeend',
+          '<div class="collection-item mb-2 flex items-center">'
+            + html +
+            '<button type="button" class="remove-item ml-2 btn btn-sm btn-ghost text-error">✕</button>'
+          + '</div>'
+        );
+        container.dataset.index = String(index+1);
+      }
 
-      // Suppression (délégation d'événement)
-      document.body.addEventListener('click', e => {
-        if (e.target.matches('.remove-item')) {
-          e.target.closest('.collection-item').remove();
+      var addBtn = document.getElementById(addBtnId);
+      if(addBtn) addBtn.addEventListener('click', add);
+    }
+
+    function init(){
+      hookCollection('modalites-collection','add-modalite');
+      hookCollection('objectifs-collection','add-objectif');
+
+      document.body.addEventListener('click', function(e){
+        var btn = e.target.closest('.remove-item');
+        if(btn){
+          var item = btn.closest('.collection-item');
+          if(item) item.remove();
         }
       });
-    });
+    }
+
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
   </script>
 {% endblock %}
+
