@@ -2,8 +2,10 @@
 {% extends 'base.html.twig' %}
 {% block body %}
 <div class="flex">
-  <main class="flex-1 p-4">
-    <h1>Tableau de bord</h1>
+  <main class="flex-1 space-y-6 p-4">
+    <h2 class="text-2xl font-semibold text-base-content">
+      Tableau de bord
+    </h2>
     <div class="grid grid-cols-4 gap-4">
       <div {{ vue_component('Dashboard/StatsCard', { label: 'Formations en cours', value: 8 }) }}></div>
       <div {{ vue_component('Dashboard/StatsCard', { label: 'Devis en attente', value: 5 }) }}></div>

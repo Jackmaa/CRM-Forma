@@ -1,72 +1,81 @@
 <template>
     <div
-        class="card bg-base-100 shadow-lg hover:shadow-xl transition p-4 flex items-center gap-4"
+        class="bg-base-100 shadow-lg hover:shadow-xl transition p-4 flex items-center gap-4"
+        @click="emit('click') || emit('view', displayId)"
     >
-        <div class="avatar">
-            <div
-                class="w-12 h-12 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold"
-            >
-                {{ initials }}
-            </div>
+        <div
+            class="w-12 h-12 rounded-full bg-primary text-primary-content grid place-items-center"
+        >
+            <span class="font-bold leading-none text-base">{{
+                displayInitials
+            }}</span>
         </div>
         <div class="flex-1">
-            <h3 class="text-lg font-medium text-base-content">{{ name }}</h3>
-            <p class="text-sm text-base-content opacity-70">{{ email }}</p>
+            <h3 class="text-lg font-medium text-base-content">
+                {{ displayName }}
+            </h3>
+            <p class="text-sm text-base-content opacity-70">
+                {{ displayEmail }}
+            </p>
         </div>
-        <button
-            @click="$emit('view', id)"
-            class="btn btn-ghost btn-sm text-success"
-        >
-            Voir
-        </button>
     </div>
 </template>
+
 <script setup>
 /**
- * Composant carte utilisateur réutilisable.
- *
- * Affiche les initiales, le nom, l'email, et un bouton "Voir".
- *
- * Props :
- * - user (Object, requis) : Données utilisateur (id, name, email, initials).
- *
- * Événements :
- * - view : émis au clic sur le bouton "Voir".
+ * UserCard — accepte soit un objet `user`, soit des props à plat.
+ * Émet `click` (compatible @click sur le composant) et `view` (avec l'id).
  */
-import { computed } from "vue"; // ✅ indispensable
+import { computed } from "vue";
 
-const emit = defineEmits(["view"]); // (optionnel mais propre)
+const emit = defineEmits(["click", "view"]);
 
 const props = defineProps({
-    user: { type: Object, required: true },
+    user: { type: Object, default: null }, // optionnel
+    id: [String, Number],
+    name: String,
+    email: String,
+    initials: String,
+    role: String,
+    isActive: Boolean,
 });
 
-const name = computed(() => {
+const displayId = computed(() => props.id ?? props.user?.id);
+
+const displayName = computed(() => {
+    if (props.name) return props.name;
     const u = props.user || {};
     const fallback = [u.prenom, u.nom].filter(Boolean).join(" ").trim();
-    return u.name || u.fullname || fallback;
+    return u.name || u.fullname || fallback || u.email || "";
 });
 
-const initials = computed(() => {
+const displayEmail = computed(() => props.email ?? props.user?.email ?? "");
+
+function makeInitials(str) {
+    if (!str) return "??";
+    return str
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((s) => s.charAt(0).toUpperCase())
+        .join("");
+}
+
+const displayInitials = computed(() => {
+    if (props.initials) return props.initials;
     const u = props.user || {};
-    if (u.initials) return u.initials;
     const base =
-        u.prenom && u.nom
-            ? `${u.prenom} ${u.nom}`
-            : u.fullname || u.email || "";
-    return (
-        base
-            .split(/\s+/)
-            .slice(0, 2)
-            .map((s) => s.charAt(0).toUpperCase())
-            .join("") || "??"
-    );
+        props.name ||
+        u.name ||
+        u.fullname ||
+        [u.prenom, u.nom].filter(Boolean).join(" ").trim() ||
+        props.email ||
+        u.email ||
+        "";
+    return makeInitials(base);
 });
-
-const id = computed(() => props.user?.id);
-const email = computed(() => props.user?.email || "");
 </script>
 
 <style scoped>
-/* DaisyUI gère les styles, pas de CSS custom nécessaire */
+/* DaisyUI gère le style */
 </style>

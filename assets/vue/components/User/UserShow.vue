@@ -7,8 +7,9 @@
             class="flex flex-col md:flex-row md:justify-between items-start md:items-center bg-base-100 p-4 rounded-lg shadow"
         >
             <h1 class="text-3xl font-bold text-base-content">
-                {{ user.prenom }} {{ user.nom }}
+                {{ viewUser.prenom }} {{ viewUser.nom }}
             </h1>
+
             <div class="mt-3 md:mt-0 flex gap-2">
                 <template v-if="!editing">
                     <!-- boutons Éditer/Supprimer : visibles uniquement aux admins -->
@@ -52,13 +53,13 @@
             <!-- 📝 Résumé (colonne de gauche) -->
             <div class="lg:col-span-1 space-y-4">
                 <SectionCard icon="User" title="Détails utilisateur">
-                    <InfoRow label="Prénom" :value="user.prenom" />
-                    <InfoRow label="Nom" :value="user.nom" />
-                    <InfoRow label="Email" :value="user.email" />
-                    <InfoRow label="Rôle" :value="roleLabel(user.role)" />
+                    <InfoRow label="Prénom" :value="viewUser.prenom" />
+                    <InfoRow label="Nom" :value="viewUser.nom" />
+                    <InfoRow label="Email" :value="viewUser.email" />
+                    <InfoRow label="Rôle" :value="roleLabel(viewUser.role)" />
                     <InfoRow
                         label="Actif"
-                        :value="user.isActive ? 'Oui' : 'Non'"
+                        :value="viewUser.isActive ? 'Oui' : 'Non'"
                     />
                 </SectionCard>
             </div>
@@ -165,7 +166,8 @@
  * - errorGeneral : erreur générale
  * - saving : état de sauvegarde
  */
-import { ref, reactive } from "vue";
+import { ref, reactive, unref } from "vue";
+import { patchJson, getJson } from "@/utils/apiFetch";
 import { toast } from "@/composables/useToast";
 import { useAuth } from "@/composables/useAuth";
 import ToastContainer from "@/components/ToastContainer.vue";
@@ -180,8 +182,9 @@ export default {
         saveUrl: String,
         deleteUrl: String,
         csrfToken: String,
+        detailUrl: String,
     },
-    setup(props) {
+    setup(props, { emit }) {
         const { isAdmin } = useAuth();
 
         const editing = ref(false);
@@ -189,9 +192,12 @@ export default {
         const errors = reactive({});
         const errorGeneral = ref("");
         const form = reactive({ ...props.user, password: "" });
+        const viewUser = reactive({ ...props.user });
+        const toApiPath = (u) => (u && u.startsWith("/api") ? u.slice(4) : u);
+        const detailPath = toApiPath(props.detailUrl || props.saveUrl);
 
         function startEdit() {
-            if (!isAdmin.value) return;
+            if (!unref(isAdmin)) return; // ✅ marche si bool OU ref
             editing.value = true;
             Object.keys(errors).forEach((k) => delete errors[k]);
             errorGeneral.value = "";
@@ -210,27 +216,28 @@ export default {
             const payload = { ...form };
             if (!payload.password) delete payload.password;
 
-            const res = await fetch(props.saveUrl, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-
-            if (res.ok) {
-                toast.success("Utilisateur mis à jour !"); // ← success toast
+            try {
+                // 1) PATCH
+                await patchJson(toApiPath(props.saveUrl), payload);
+                // 2) GET “fresh” (soft refresh interne)
+                try {
+                    const fresh = await getJson(detailPath);
+                    Object.assign(viewUser, fresh);
+                    Object.assign(form, { ...fresh, password: "" });
+                } catch {
+                    // fallback si le GET échoue : on applique au moins ce qu’on vient d’envoyer
+                    Object.assign(viewUser, payload);
+                }
                 editing.value = false;
-                Object.assign(props.user, payload);
-            } else if (res.status === 400) {
-                const json = await res.json();
-                Object.assign(errors, json.violations || {});
-                errorGeneral.value = json.message || "";
-                toast.error("Erreur de validation"); // ← validation toast
-            } else {
-                errorGeneral.value = "Une erreur est survenue.";
-                toast.error("Échec de la mise à jour"); // ← general error
+                toast.success("Utilisateur mis à jour !");
+                emit?.("updated", { id: viewUser.id, ...viewUser });
+            } catch (e) {
+                // si ton backend renvoie des violations { field: 'message' } tu peux les parser ici
+                errorGeneral.value = e?.message || "Une erreur est survenue.";
+                toast.error("Échec de la mise à jour");
+            } finally {
+                saving.value = false;
             }
-
-            saving.value = false;
         }
         function confirmDelete(e) {
             if (!isAdmin.value || !confirm("Confirmer la suppression ?"))
@@ -251,6 +258,7 @@ export default {
             isAdmin,
             editing,
             form,
+            viewUser,
             errors,
             errorGeneral,
             saving,

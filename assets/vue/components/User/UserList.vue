@@ -191,20 +191,11 @@
 
                 <!-- MODE LECTURE -->
                 <template v-else>
-                    <h3 class="text-lg font-semibold text-base-content mb-1">
-                        {{ user.fullname || `${user.prenom} ${user.nom}` }}
-                    </h3>
-                    <p class="text-sm text-base-content/70">{{ user.email }}</p>
-                    <p class="text-sm text-base-content/70">
-                        Rôle:
-                        {{
-                            roleOptions.find((r) => r.value === user.role)
-                                ?.label || user.role
-                        }}
-                    </p>
-                    <p class="text-sm text-base-content/70">
-                        Actif: {{ user.isActive ? "Oui" : "Non" }}
-                    </p>
+                    <UserCard
+                        :user="user"
+                        @view="goShow"
+                        class="cursor-pointer"
+                    />
                     <div class="flex justify-between mt-4">
                         <a
                             :href="getShowUrl(user.id)"
@@ -235,6 +226,7 @@
  * - Filtre/search robustes
  */
 import { ref, computed, onMounted } from "vue";
+import UserCard from "./UserCard.vue";
 import Papa from "papaparse";
 import { Plus } from "lucide-vue-next";
 import ImportOption from "./ImportOption.vue";
@@ -281,6 +273,10 @@ const filteredUsers = computed(() => {
     });
 });
 
+function goShow(id) {
+    window.location.href = getShowUrl(id);
+}
+
 function getShowUrl(id) {
     return userShowTemplate.replace("ID_PLACEHOLDER", id);
 }
@@ -318,7 +314,7 @@ async function saveUser(userId) {
         const payload = { ...editBuffer.value };
         const url = userApiDetailTpl.replace("ID_PLACEHOLDER", userId);
 
-        // ⬇️ data = ce que renvoie ton API (ou undefined si 204)
+        // ⬇️ data = ce que renvoie l'API (ou undefined si 204)
         const data = await patchJson(url, payload);
         const updated = data ?? payload; // fallback si 204 No Content
 
