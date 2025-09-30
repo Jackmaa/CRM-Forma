@@ -64,7 +64,7 @@
  * - edit-step : émis lors du clic sur un bouton "Modifier ..."
  */
 import { ref, onMounted, computed } from "vue";
-
+import { getJson } from "@/utils/apiFetch";
 const props = defineProps({
     formationId: Number,
     dateDebut: String,
@@ -89,20 +89,17 @@ onMounted(async () => {
     );
     formationTitle.value = f.title;
 
-    // Récupère les formateurs
-    if (props.formateurIds.length) {
+    // Formateurs
+    if (props.formateurIds?.length) {
         formateurs.value = await Promise.all(
-            props.formateurIds.map((id) =>
-                fetch(`/api/user/${id}`).then((r) => r.json())
-            )
+            props.formateurIds.map((id) => getJson(`/user/${id}`))
         );
     }
-    // Récupère les participants
-    if (props.participantIds.length) {
+
+    // Participants
+    if (props.participantIds?.length) {
         participants.value = await Promise.all(
-            props.participantIds.map((id) =>
-                fetch(`/api/user/${id}`).then((r) => r.json())
-            )
+            props.participantIds.map((id) => getJson(`/user/${id}`))
         );
     }
 });
