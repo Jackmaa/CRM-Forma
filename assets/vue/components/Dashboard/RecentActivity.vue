@@ -69,6 +69,9 @@ import { apiFetch } from "../../utils/apiFetch";
 const items = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const props = defineProps({
+    limit: { type: Number, default: 5 },
+});
 
 /**
  * Calcule le temps relatif (ex: "il y a 2 min") à partir d'une date ISO.
@@ -102,7 +105,7 @@ function getIconComponent(action) {
 // Chargement des activités récentes à l'initialisation du composant
 onMounted(async () => {
     try {
-        const data = await apiFetch("/recent-activities", {
+        const data = await apiFetch(`/recent-activities?limit=${props.limit}`, {
             headers: { Accept: "application/json" },
         });
 

@@ -19,7 +19,7 @@ class ActivityRepository extends ServiceEntityRepository {
      * @param int $limit
      * @return Activity[]
      */
-    public function findRecent(int $limit = 10): array {
+    public function findRecent(int $limit = 5): array {
         return $this->createQueryBuilder('a')
             ->orderBy('a.createdAt', 'DESC')
             ->setMaxResults($limit)
