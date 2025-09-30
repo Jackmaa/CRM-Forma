@@ -105,9 +105,7 @@ function getIconComponent(action) {
 // Chargement des activités récentes à l'initialisation du composant
 onMounted(async () => {
     try {
-        const data = await apiFetch(`/recent-activities?limit=${props.limit}`, {
-            headers: { Accept: "application/json" },
-        });
+        const data = await apiFetch(`/recent-activities?limit=${props.limit}`);
 
         items.value = data.map((a) => ({
             id: a.id,
