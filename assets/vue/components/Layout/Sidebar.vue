@@ -1,14 +1,14 @@
 <template>
     <aside
         :class="[
-            'flex flex-col justify-between transition-all duration-300 ease-in-out h-screen  bg-base-200 overflow-x-hidden',
+            'flex flex-col justify-between transition-all duration-300 ease-in-out h-screen px-2 bg-base-200 overflow-x-hidden',
             isCollapsed ? 'w-16' : 'w-64',
         ]"
     >
         <div>
             <!-- Collapse toggle -->
             <button
-                @click="isCollapsed = !isCollapsed"
+                @click="toggleSidebar"
                 class="btn btn-ghost btn-square w-full mb-4"
             >
                 <ChevronLeft
@@ -21,8 +21,8 @@
 
             <!-- Logo / Title -->
             <h1
-                class="font-bold mb-6 text-lg transition-opacity duration-300 text-base-content px-2"
-                :class="isCollapsed ? 'opacity-0' : 'opacity-100'"
+                v-show="!isCollapsed"
+                class="font-bold mb-6 text-lg text-base-content px-2"
             >
                 CRM Formation
             </h1>
@@ -102,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import SidebarLink from "./SidebarLink.vue";
 import { useUserSettings } from "@/composables/useUserSettings.js";
@@ -117,6 +117,31 @@ import { useUserSettings } from "@/composables/useUserSettings.js";
  * - forcePasswordReset (Boolean) : Indique si un changement de mot de passe est requis.
  */
 const isCollapsed = ref(false);
+const userOverrode = ref(false);
+const isMobile = ref(false);
+
+onMounted(() => {
+    const mq = window.matchMedia("(max-width: 768px)"); // ~ Tailwind md
+    const apply = () => {
+        isMobile.value = mq.matches;
+        // collapsed par défaut en mobile, sauf si l'utilisateur a cliqué
+        if (!userOverrode.value) isCollapsed.value = mq.matches;
+    };
+    apply();
+    mq.addEventListener
+        ? mq.addEventListener("change", apply)
+        : mq.addListener(apply);
+    onBeforeUnmount(() => {
+        mq.removeEventListener
+            ? mq.removeEventListener("change", apply)
+            : mq.removeListener(apply);
+    });
+});
+
+function toggleSidebar() {
+    userOverrode.value = true;
+    isCollapsed.value = !isCollapsed.value;
+}
 const { forcePasswordReset } = useUserSettings();
 
 /**

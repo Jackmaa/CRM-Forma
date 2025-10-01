@@ -1,7 +1,9 @@
 <template>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Boutons principaux -->
-        <button class="btn btn-outline">+ Nouveau devis</button>
+        <button class="btn btn-outline" @click="goToDevis">
+            + Nouveau devis
+        </button>
         <button
             @click="openWizard"
             class="btn btn-outline flex items-center justify-center"
@@ -41,6 +43,10 @@ import SessionWizard from "../Session/SessionWizard.vue";
 
 const showWizard = ref(false);
 
+const props = defineProps({ devisNewUrl: { type: String, required: true } });
+const goToDevis = () => {
+    window.location.href = "/devis/new";
+};
 /**
  * Ouvre le wizard de planification de formation.
  */

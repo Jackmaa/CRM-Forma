@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+{% block title %}Devis {{ doc.number }}{% endblock %}
+
+{% block body %}
+<div class="p-6 space-y-4">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold">Devis {{ doc.number }}</h1>
+    <div class="space-x-2">
+      <a class="btn btn-outline" href="{{ path('devis_download', {id: doc.id}) }}">Voir / Télécharger le PDF</a>
+      <form method="post" action="{{ path('devis_send', {id: doc.id}) }}" class="inline">
+        <button class="btn btn-accent">Envoyer par email</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card bg-base-200 p-4">
+    <p><strong>Status :</strong> {{ doc.status }}</p>
+    <p><strong>Destinataire :</strong> {{ snapshot.dest.company }} — {{ snapshot.dest.contact_fullname }} ({{ snapshot.dest.contact_email }})</p>
+    <p><strong>Total TTC :</strong> {{ snapshot.totals.ttc|number_format(2, ',', ' ') }} €</p>
+  </div>
+
+  <div class="card bg-base-100 p-4">
+    <h2 class="font-semibold mb-2">Aperçu rapide</h2>
+    <ul class="list-disc pl-6">
+      {% for l in snapshot.lines %}
+        <li>{{ l.description }} — {{ l.qty }} × {{ l.unit_ht|number_format(2, ',', ' ') }} € HT (TVA {{ l.tva_rate ?? 0 }}%)</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

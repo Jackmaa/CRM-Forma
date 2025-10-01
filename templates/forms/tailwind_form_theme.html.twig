@@ -18,10 +18,11 @@
 {# labels stylés #}
 {% block form_label -%}
   {% if label is not same as(false) %}
-    {% set label_attr = label_attr|merge({'class': (label_attr.class|default('block text-sm font-medium text-gray-700 mb-1'))}) %}
+    {% set attr = attr|merge({ class: (attr.class|default('') ~ ' label-text text-gray-300 border-none flex')|trim }) %}
+    <label {{ block('attributes') }}>{{ label|trans({}, translation_domain) }}</label>
   {% endif %}
-  {{- parent() -}}
 {%- endblock %}
+
 
 {# widgets (inputs, selects, textarea) stylés #}
 {% block form_widget_simple -%}

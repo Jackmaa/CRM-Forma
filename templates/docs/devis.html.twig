@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body{font-family:Arial,system-ui; font-size:12px; color:#111}
+    h1{font-size:18px;margin:0 0 8px}
+    h2{font-size:14px;margin:12px 0 6px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #ddd;padding:6px;text-align:left}
+    th{background:#f6f6f6}
+    .totals{margin-top:10px;float:right;width:45%}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Devis {{ document.number }}</h1>
+  <div>
+    <strong>{{ snapshot.of.name }}</strong> — SIRET {{ snapshot.of.siret }}<br>
+    {{ snapshot.of.address }}<br>
+    {% if snapshot.of.logo %}<img src="{{ snapshot.of.logo }}" style="height:40px">{% endif %}
+  </div>
+</header>
+
+<section>
+  <h2>Destinataire</h2>
+  <div>
+    <strong>{{ snapshot.dest.company }}</strong><br>
+    Contact : {{ snapshot.dest.contact_fullname }} — {{ snapshot.dest.contact_email }}<br>
+    {{ snapshot.dest.address }}
+  </div>
+</section>
+
+<section>
+  <h2>Prestation</h2>
+  <p>
+    {{ snapshot.meta.formation_title }} • {{ snapshot.meta.hours_total }} h • {{ snapshot.meta.modality }}
+    {% if snapshot.meta.session_code %} • Session {{ snapshot.meta.session_code }}{% endif %}
+  </p>
+</section>
+
+<section>
+  <h2>Détail</h2>
+  <table>
+    <thead>
+      <tr><th>Description</th><th>Qté</th><th>PU HT</th><th>TVA %</th><th>Total HT</th></tr>
+    </thead>
+    <tbody>
+      {% for l in snapshot.lines %}
+      <tr>
+        <td>{{ l.description|default('—') }}</td>
+        <td>{{ l.qty|default(0) }}</td>
+        <td>{{ (l.unit_ht|default(0))|number_format(2, ',', ' ') }} €</td>
+        <td>{{ l.tva_rate|default(0) }}%</td>
+        <td>{{ (l.total_ht|default(0))|number_format(2, ',', ' ') }} €</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <table>
+      <tr><th>Total HT</th><td>{{ snapshot.totals.ht|number_format(2, ',', ' ') }} €</td></tr>
+      <tr><th>TVA</th><td>{{ snapshot.totals.tva|number_format(2, ',', ' ') }} €</td></tr>
+      <tr><th>Total TTC</th><td><strong>{{ snapshot.totals.ttc|number_format(2, ',', ' ') }} €</strong></td></tr>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Conditions</h2>
+  <p>Valable jusqu’au {{ snapshot.meta.validity_end|date('d/m/Y') }}.</p>
+  {% if snapshot.meta.tva_exempt %}
+    <p><em>{{ snapshot.legal.tva_text }}</em></p>
+  {% endif %}
+</section>
+</body></html>

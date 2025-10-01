@@ -1,7 +1,5 @@
 <template>
-    <div
-        class="mx-auto max-w-3xl bg-base-100 shadow-lg rounded-lg p-6 space-y-6"
-    >
+    <div class="mx-auto max-w-4xl bg-base-100 shadow-lg rounded-lg p-0">
         <!-- Barre de progression DaisyUI -->
         <div class="steps w-full">
             <div

@@ -1,0 +1,49 @@
+{# templates/emails/devis_ready.html.twig #}
+<p>Bonjour {{ snapshot.dest.contact_fullname|default('') }},</p>
+
+<p>Veuillez trouver ci-joint votre devis <strong>{{ document.number }}</strong>.</p>
+
+<table width="100%" cellpadding="6" cellspacing="0" style="border-collapse:collapse;border:1px solid #eee;font-family:Arial,Helvetica,sans-serif;font-size:14px;">
+  <thead style="background:#f6f6f6">
+    <tr>
+      <th align="left" style="border:1px solid #eee;">Description</th>
+      <th align="left" style="border:1px solid #eee;">Qté</th>
+      <th align="left" style="border:1px solid #eee;">PU HT</th>
+      <th align="left" style="border:1px solid #eee;">TVA %</th>
+      <th align="left" style="border:1px solid #eee;">Total HT</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for l in snapshot.lines %}
+    <tr>
+      <td style="border:1px solid #eee;">{{ l.description|default('—') }}</td>
+      <td style="border:1px solid #eee;">{{ l.qty|default(0) }}</td>
+      <td style="border:1px solid #eee;">{{ (l.unit_ht|default(0))|number_format(2, ',', ' ') }} €</td>
+      <td style="border:1px solid #eee;">{{ l.tva_rate|default(0) }}%</td>
+      <td style="border:1px solid #eee;">{{ (l.total_ht|default(0))|number_format(2, ',', ' ') }} €</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="4" align="right" style="border:1px solid #eee;"><strong>Total HT</strong></td>
+      <td style="border:1px solid #eee;">{{ snapshot.totals.ht|number_format(2, ',', ' ') }} €</td>
+    </tr>
+    <tr>
+      <td colspan="4" align="right" style="border:1px solid #eee;"><strong>TVA</strong></td>
+      <td style="border:1px solid #eee;">{{ snapshot.totals.tva|number_format(2, ',', ' ') }} €</td>
+    </tr>
+    <tr>
+      <td colspan="4" align="right" style="border:1px solid #eee;"><strong>Total TTC</strong></td>
+      <td style="border:1px solid #eee;"><strong>{{ snapshot.totals.ttc|number_format(2, ',', ' ') }} €</strong></td>
+    </tr>
+  </tfoot>
+</table>
+
+<p style="margin:16px 0;">
+  <a href="{{ downloadUrl }}" style="display:inline-block;padding:10px 16px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+    Voir le devis (PDF)
+  </a>
+</p>
+
+<p>Cordialement,<br>{{ snapshot.of.name|default('Votre organisme de formation') }}</p>

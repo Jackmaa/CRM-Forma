@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouveau devis{% endblock %}
+
+{% block body %}
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-4">Nouveau devis</h1>
+  {{ form_start(form) }}
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="space-y-3">
+      <h2 class="font-semibold">Destinataire</h2>
+      {{ form_row(form.dest_company) }}
+      {{ form_row(form.dest_contact_fullname) }}
+      {{ form_row(form.dest_contact_email) }}
+      {{ form_row(form.dest_address) }}
+    </div>
+
+    <div class="space-y-3">
+      <h2 class="font-semibold">Informations formation (optionnel)</h2>
+      {{ form_row(form.formation_title) }}
+      {{ form_row(form.session_code) }}
+      {{ form_row(form.hours_total) }}
+      {{ form_row(form.modality) }}
+
+      <div class="flex items-center gap-6">
+        <label for="{{ form.tva_exempt.vars.id }}" class="label cursor-pointer gap-2">
+          {{ form_widget(form.tva_exempt, { attr: { class: 'checkbox' } }) }}
+          <span class="label-text">TVA exonérée</span>
+        </label>
+
+        <div class="min-w-[180px]">
+          {{ form_row(form.validity_days) }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <h2 class="text-xl font-semibold mb-2">Lignes</h2>
+
+{# on fabrique le HTML de la ligne prototype dans une variable, puis on l'échappe pour data-prototype #}
+{% set line_proto %}
+  <div class="grid grid-cols-[2fr,0.6fr,1fr,0.6fr,auto] gap-2 items-end mb-2 line-row">
+    {{ form_row(form.lines.vars.prototype.description) }}
+    {{ form_row(form.lines.vars.prototype.qty) }}
+    {{ form_row(form.lines.vars.prototype.unit_ht) }}
+    {{ form_row(form.lines.vars.prototype.tva_rate) }}
+    <button type="button" class="btn btn-error remove-line">−</button>
+  </div>
+{% endset %}
+
+<div id="lines-wrapper" data-prototype="{{ line_proto|e('html_attr') }}">
+  {# lignes déjà présentes (au cas où tu en précharges plus tard) #}
+  {% for line in form.lines %}
+    <div class="grid grid-cols-[2fr,0.6fr,1fr,0.6fr,auto] gap-2 items-end mb-2 line-row">
+      {{ form_row(line.description) }}
+      {{ form_row(line.qty) }}
+      {{ form_row(line.unit_ht) }}
+      {{ form_row(line.tva_rate) }}
+      <button type="button" class="btn btn-error remove-line">−</button>
+    </div>
+  {% endfor %}
+</div>
+
+<button type="button" class="btn btn-outline mt-2" id="add-line">+ Ajouter une ligne</button>
+
+
+  <div class="mt-8">
+    <button class="btn btn-primary">Générer le PDF</button>
+  </div>
+
+  {{ form_end(form) }}
+</div>
+
+<script>
+  (function(){
+    const wrapper = document.getElementById('lines-wrapper');
+    const addBtn = document.getElementById('add-line');
+    let index = wrapper.querySelectorAll('.line-row').length;
+
+    function bindRemove(btn){ btn.addEventListener('click', () => btn.closest('.line-row').remove()); }
+    wrapper.querySelectorAll('.remove-line').forEach(bindRemove);
+
+    addBtn.addEventListener('click', () => {
+      const html = wrapper.dataset.prototype.replace(/__name__/g, index);
+      wrapper.insertAdjacentHTML('beforeend', html);
+      bindRemove(wrapper.lastElementChild.querySelector('.remove-line'));
+      index++;
+    });
+
+    // 👉 Si aucune ligne au chargement, on en ajoute une automatiquement
+    if (index === 0) {
+      addBtn.click();
+    }
+  })();
+</script>
+
+{% endblock %}
