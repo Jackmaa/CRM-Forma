@@ -25,12 +25,40 @@ class DevisController extends AbstractController {
         DocumentNumberGenerator $num,
         DocumentPdfGenerator $pdf
     ): Response {
-        // 1 ligne pré-remplie
-        $initialData = [
-            'lines' => [
-                ['description' => '', 'qty' => 1, 'unit_ht' => 0, 'tva_rate' => 20],
-            ],
-        ];
+        $initialData = null;
+
+        // si on arrive depuis “Dupliquer”
+        if ($r->isMethod('GET') && $sourceId = $r->query->get('source')) {
+            $source = $em->getRepository(Document::class)->find($sourceId);
+            if ($source && $source->getType() === Document::TYPE_DEVIS) {
+                $s           = $source->getSnapshot();
+                $initialData = [
+                    'dest_company'          => $s['dest']['company'] ?? '',
+                    'dest_contact_fullname' => $s['dest']['contact_fullname'] ?? '',
+                    'dest_contact_email'    => $s['dest']['contact_email'] ?? '',
+                    'dest_address'          => $s['dest']['address'] ?? '',
+                    'formation_title'       => $s['meta']['formation_title'] ?? null,
+                    'session_code'          => $s['meta']['session_code'] ?? null,
+                    'hours_total'           => $s['meta']['hours_total'] ?? null,
+                    'modality'              => $s['meta']['modality'] ?? null,
+                    'tva_exempt'            => (bool) ($s['meta']['tva_exempt'] ?? false),
+                    'validity_days'         => (int) ($s['meta']['validity_days'] ?? 30),
+                    'lines'                 => array_map(fn($l) => [
+                        'description' => $l['description'] ?? '',
+                        'qty'         => $l['qty'] ?? 1,
+                        'unit_ht'     => $l['unit_ht'] ?? 0,
+                        'tva_rate'    => $l['tva_rate'] ?? 20,
+                    ], $s['lines'] ?? []),
+                ];
+            }
+        }
+
+        // si pas de source, on met une ligne vide par défaut
+        if ($initialData === null && $r->isMethod('GET')) {
+            $initialData = [
+                'lines' => [['description' => '', 'qty' => 1, 'unit_ht' => 0, 'tva_rate' => 20]],
+            ];
+        }
 
         $form = $this->createForm(DevisType::class, $initialData);
         $form->handleRequest($r);
@@ -158,5 +186,60 @@ class DevisController extends AbstractController {
             $this->addFlash('error', 'Email destinataire ou PDF manquant.');
         }
         return $this->redirectToRoute('devis_show', ['id' => $doc->getId()]);
+    }
+    #[Route('', name: 'devis_index')]
+    public function index(Request $r, EntityManagerInterface $em): Response {
+        $status = $r->query->get('status');               // GENERATED|SENT|SIGNED|ARCHIVED|""|null
+        $q      = trim((string) $r->query->get('q', '')); // recherche sur le numéro
+        $year   = $r->query->get('year');                 // ex: 2025
+        $page   = max(1, (int) $r->query->get('page', 1));
+        $limit  = 20;
+
+        $qb = $em->createQueryBuilder()
+            ->from(\App\Entity\Document::class, 'd')
+            ->select('d')
+            ->where('d.type = :type')->setParameter('type', \App\Entity\Document::TYPE_DEVIS);
+
+        if ($status) {
+            $qb->andWhere('d.status = :status')->setParameter('status', $status);
+        }
+        if ($q !== '') {
+            $qb->andWhere('d.number LIKE :q')->setParameter('q', '%' . $q . '%');
+        }
+        if ($year) {
+            // DQL accepte YEAR(), sinon on peut filtrer sur un intervalle de dates
+            $qb->andWhere('YEAR(d.createdAt) = :y')->setParameter('y', (int) $year);
+        }
+
+        // total
+        $countQb = clone $qb;
+        $total   = (int) $countQb->select('COUNT(d.id)')->getQuery()->getSingleScalarResult();
+
+        // items
+        $items = $qb->orderBy('d.createdAt', 'DESC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->getQuery()->getResult();
+
+        $pages       = (int) max(1, ceil($total / $limit));
+        $currentYear = (int) date('Y');
+        $years       = range($currentYear, $currentYear - 5);
+
+        return $this->render('devis/index.html.twig', [
+            'items'  => $items,
+            'total'  => $total,
+            'page'   => $page,
+            'pages'  => $pages,
+            'limit'  => $limit,
+            'q'      => $q,
+            'status' => $status,
+            'year'   => $year,
+            'years'  => $years,
+        ]);
+    }
+    #[Route('/{id}/duplicate', name: 'devis_duplicate', methods: ['GET'])]
+    public function duplicate(Document $doc): Response {
+        // on redirige vers /devis/new avec l'id source en query string
+        return $this->redirectToRoute('devis_new', ['source' => $doc->getId()]);
     }
 }

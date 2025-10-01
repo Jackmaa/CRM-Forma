@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+{% block title %}Devis{% endblock %}
+
+{% block body %}
+<div class="p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold">Devis</h1>
+    <div class="space-x-2">
+      <a href="{{ path('devis_new') }}" class="btn btn-primary">+ Nouveau devis</a>
+    </div>
+  </div>
+
+  {# Filtres #}
+  <form method="get" class="grid md:grid-cols-[2fr,1fr,1fr,auto] gap-3 items-end bg-base-200 p-4 rounded-xl">
+    <div>
+      <label class="label"><span class="label-text">Recherche (n° de devis)</span></label>
+      <input type="text" name="q" value="{{ q }}" class="input input-bordered w-full" placeholder="DEV-2025-00012">
+    </div>
+    <div>
+      <label class="label"><span class="label-text">Statut</span></label>
+      <select name="status" class="select select-bordered w-full">
+        <option value="">— Tous —</option>
+        {% set statuses = ['GENERATED','SENT','SIGNED','ARCHIVED'] %}
+        {% for s in statuses %}
+          <option value="{{ s }}" {{ s==status ? 'selected' }}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="label"><span class="label-text">Année</span></label>
+      <select name="year" class="select select-bordered w-full">
+        <option value="">— Toutes —</option>
+        {% for y in years %}
+          <option value="{{ y }}" {{ y==year ? 'selected' }}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn btn-outline">Filtrer</button>
+      <a href="{{ path('devis_index') }}" class="btn">Réinitialiser</a>
+    </div>
+  </form>
+
+  {# Table #}
+  <div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Date</th>
+          <th>Destinataire</th>
+          <th>Total TTC</th>
+          <th>Statut</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for d in items %}
+        {% set s = d.snapshot %}
+        <tr>
+          <td class="font-mono">{{ d.number }}</td>
+          <td>{{ d.createdAt|date('d/m/Y') }}</td>
+          <td>
+            {{ s.dest.company|default('—') }}<br>
+            <small class="opacity-70">{{ s.dest.contact_fullname|default('') }}</small>
+          </td>
+          <td>{{ s.totals.ttc|default(0)|number_format(2, ',', ' ') }} €</td>
+          <td>
+            {% set badge = {
+              'GENERATED':'badge',
+              'SENT':'badge badge-info',
+              'SIGNED':'badge badge-success',
+              'ARCHIVED':'badge badge-neutral'
+            } %}
+            <span class="{{ badge[d.status]|default('badge') }}">{{ d.status }}</span>
+          </td>
+          <td class="text-right space-x-2">
+          <a class="btn btn-xs btn-outline" href="{{ path('devis_duplicate', {id: d.id}) }}">Dupliquer</a>
+            <a class="btn btn-xs" href="{{ path('devis_show', {id: d.id}) }}">Voir</a>
+            <a class="btn btn-xs btn-ghost" href="{{ path('devis_download', {id: d.id}) }}">PDF</a>
+            <form method="post" action="{{ path('devis_send', {id: d.id}) }}" class="inline">
+              <button class="btn btn-xs btn-accent" {% if not d.filePath %}disabled{% endif %}>Envoyer</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" class="text-center opacity-70">Aucun devis.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Pagination simple #}
+  {% if pages > 1 %}
+    <div class="join">
+      {% for p in 1..pages %}
+        {% set url = path('devis_index', app.request.query.all|merge({'page': p})) %}
+        <a href="{{ url }}" class="join-item btn btn-sm {{ p==page ? 'btn-active' : '' }}">{{ p }}</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -6,6 +6,7 @@
   <div class="flex items-center justify-between">
     <h1 class="text-2xl font-bold">Devis {{ doc.number }}</h1>
     <div class="space-x-2">
+    <a class="btn btn-outline" href="{{ path('devis_duplicate', {id: doc.id}) }}">Dupliquer</a>
       <a class="btn btn-outline" href="{{ path('devis_download', {id: doc.id}) }}">Voir / Télécharger le PDF</a>
       <form method="post" action="{{ path('devis_send', {id: doc.id}) }}" class="inline">
         <button class="btn btn-accent">Envoyer par email</button>

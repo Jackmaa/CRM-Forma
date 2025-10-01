@@ -4,6 +4,9 @@
         <button class="btn btn-outline" @click="goToDevis">
             + Nouveau devis
         </button>
+        <button class="btn btn-outline" @click="goToDevisIndex">
+            📄 Voir les devis
+        </button>
         <button
             @click="openWizard"
             class="btn btn-outline flex items-center justify-center"
@@ -46,6 +49,9 @@ const showWizard = ref(false);
 const props = defineProps({ devisNewUrl: { type: String, required: true } });
 const goToDevis = () => {
     window.location.href = "/devis/new";
+};
+const goToDevisIndex = () => {
+    window.location.href = "/devis";
 };
 /**
  * Ouvre le wizard de planification de formation.
