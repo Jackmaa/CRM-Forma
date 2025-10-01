@@ -40,6 +40,7 @@ import {
     BookOpen as BookOpenIcon,
     Activity as ActivityIcon,
 } from "lucide-vue-next";
+import { getJson } from "../../utils/apiFetch.js";
 
 // Définition réactive de la liste des KPI avec valeurs par défaut
 const kpis = reactive([
@@ -66,18 +67,13 @@ const routes = {
  */
 async function loadKpis() {
     try {
-        const res = await fetch("/api/stats/kpis");
-        if (!res.ok) {
-            console.warn("Échec du chargement des KPI:", res.status);
-            return;
-        }
-        const data = await res.json();
+        const data = await getJson("/stats/kpis");
         // Mise à jour des valeurs pour chaque carte
         kpis.forEach((card) => {
             card.value = data[card.key] ?? 0;
         });
     } catch (err) {
-        console.error("Erreur lors de la requête KPI:", err);
+        console.warn("Échec du chargement des KPI:", err);
     }
 }
 
