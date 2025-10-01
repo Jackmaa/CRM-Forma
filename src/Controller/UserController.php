@@ -133,11 +133,19 @@ final class UserController extends AbstractController {
     public function getSettings(): JsonResponse {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        return $this->json([
+
+        $resp = $this->json([
             'username'           => $user->getPrenom(),
             'email'              => $user->getEmail(),
             'forcePasswordReset' => $user->getForcePasswordReset(),
         ]);
+
+        // Anti-cache
+        $resp->setPrivate();
+        $resp->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $resp->headers->set('Pragma', 'no-cache');
+
+        return $resp;
     }
 
     /**

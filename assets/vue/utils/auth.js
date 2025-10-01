@@ -25,9 +25,14 @@ export async function apiLogin(email, password) {
     if (!token) throw new Error("Token JWT manquant dans la réponse");
 
     localStorage.setItem("jwt_token", token);
+    window.dispatchEvent(new Event("auth:changed")); // ⬅️ notifie l’app
     return token;
 }
 
 export function apiLogout() {
     localStorage.removeItem("jwt_token");
+    fetch("/logout", { method: "POST", credentials: "include" }).catch(
+        () => {}
+    );
+    window.dispatchEvent(new Event("auth:changed"));
 }

@@ -48,6 +48,10 @@
 </head>
 <body class="flex">
   <div {{ vue_component('Layout/Sidebar') }}></div>
+  <form id="logout-form" action="{{ path('app_logout') }}" method="post" class="hidden">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+  </form>
+
   <main class="flex-1">
     {% block body %}{% endblock %}
   </main>

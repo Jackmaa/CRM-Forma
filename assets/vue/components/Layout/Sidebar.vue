@@ -92,8 +92,9 @@
                         icon="LogOut"
                         label="Déconnexion"
                         :collapsed="isCollapsed"
-                        to="/logout"
-                        class="text-error hover:bg-base-300"
+                        to="#"
+                        class="text-error hover:bg-base-300 mb-5"
+                        @click.prevent="handleLogout"
                     />
                 </li>
             </ul>
@@ -119,29 +120,56 @@ import { useUserSettings } from "@/composables/useUserSettings.js";
 const isCollapsed = ref(false);
 const userOverrode = ref(false);
 const isMobile = ref(false);
+const LS_KEY = "sidebar_collapsed";
 
 onMounted(() => {
-    const mq = window.matchMedia("(max-width: 768px)"); // ~ Tailwind md
+    // état sauvegardé
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved !== null) {
+        isCollapsed.value = saved === "1";
+        userOverrode.value = true; // l’utilisateur a un choix
+    }
+
+    // responsive
+    const mq = window.matchMedia("(max-width: 768px)");
     const apply = () => {
         isMobile.value = mq.matches;
-        // collapsed par défaut en mobile, sauf si l'utilisateur a cliqué
         if (!userOverrode.value) isCollapsed.value = mq.matches;
     };
     apply();
-    mq.addEventListener
-        ? mq.addEventListener("change", apply)
-        : mq.addListener(apply);
+    mq.addEventListener?.("change", apply) ?? mq.addListener(apply);
+
+    // cleanup
     onBeforeUnmount(() => {
-        mq.removeEventListener
-            ? mq.removeEventListener("change", apply)
-            : mq.removeListener(apply);
+        mq.removeEventListener?.("change", apply) ?? mq.removeListener(apply);
     });
 });
 
 function toggleSidebar() {
     userOverrode.value = true;
     isCollapsed.value = !isCollapsed.value;
+    try {
+        localStorage.setItem(LS_KEY, isCollapsed.value ? "1" : "0");
+    } catch {}
 }
+
+function handleLogout() {
+    try {
+        localStorage.removeItem("jwt_token");
+        sessionStorage.removeItem("jwt_token");
+    } catch (e) {
+        /* no-op */
+    }
+
+    const form = document.getElementById("logout-form");
+    if (form) {
+        form.submit(); // ✅ POST + CSRF -> invalide la session serveur
+    } else {
+        // filet de sécurité si le form n'est pas présent
+        window.location.href = "/logout";
+    }
+}
+
 const { forcePasswordReset } = useUserSettings();
 
 /**

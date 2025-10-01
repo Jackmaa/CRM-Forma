@@ -23,7 +23,12 @@ export async function apiFetch(pathOrUrl, options = {}) {
         return h;
     };
 
-    let res = await fetch(url, { ...options, headers: addAuth(headers) });
+    let res = await fetch(url, {
+        cache: "no-store",
+        credentials: "include",
+        ...options,
+        headers: addAuth(headers),
+    });
 
     // Retry unique si 401 -> on regénère un JWT puis retente
     if (

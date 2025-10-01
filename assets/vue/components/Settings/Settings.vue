@@ -154,7 +154,7 @@
  * - activeTab : onglet actif
  * - saving : état de sauvegarde
  */
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted, onBeforeUnmount } from "vue";
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
 import { getJson, putJson } from "@/utils/apiFetch";
 
@@ -176,14 +176,19 @@ onMounted(async () => {
             await window.awaitJwt;
         } catch {}
     }
+    window.addEventListener("auth:changed", loadSettings);
     await loadSettings();
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener("auth:changed", loadSettings);
 });
 
 /**
  * Réinitialise le formulaire et recharge les données depuis le serveur.
  */
 async function loadSettings() {
-    const data = await getJson("/user/settings");
+    const data = await getJson(`/user/settings?t=${Date.now()}`);
     if (data) Object.assign(settings, data);
 }
 

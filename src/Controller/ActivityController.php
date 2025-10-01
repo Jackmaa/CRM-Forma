@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\SerializerInterface;
  * Contrôleur pour les activités récentes (API).
  */
 class ActivityController extends AbstractController {
-    #[Route('/api/recent-activities', name: 'api_recent_activities', methods: ['GET'])]
+    #[Route('/recent-activities', name: 'api_recent_activities', methods: ['GET'])]
     /**
      * Retourne les 10 dernières activités au format JSON.
      *

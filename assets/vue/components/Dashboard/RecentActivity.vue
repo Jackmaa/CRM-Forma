@@ -64,7 +64,6 @@ import {
     PlusCircle as CreateIcon,
     Edit2 as EditIcon,
 } from "lucide-vue-next";
-import { apiFetch } from "../../utils/apiFetch";
 
 const items = ref([]);
 const loading = ref(true);
@@ -105,7 +104,14 @@ function getIconComponent(action) {
 // Chargement des activités récentes à l'initialisation du composant
 onMounted(async () => {
     try {
-        const data = await apiFetch(`/recent-activities?limit=${props.limit}`);
+        const res = await fetch(`/recent-activities?limit=${props.limit}`, {
+            method: "GET",
+            credentials: "include", // ⬅️ envoie le cookie de session
+            cache: "no-store", // ⬅️ aucune réponse du cache
+            headers: { Accept: "application/json" },
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
 
         items.value = data.map((a) => ({
             id: a.id,
