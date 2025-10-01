@@ -30,7 +30,7 @@ class SessionController extends AbstractController {
     #[Route('/', name: 'session_index', methods: ['GET'])]
     public function index(): Response {
         // Rend une page Twig avec <div {{ vue_component('Session/SessionList') }}>
-        return $this->render('session/index.html.twig');
+        return $this->redirect($this->generateUrl('formation_index') . '#sessions');
     }
 
     /**
@@ -151,7 +151,7 @@ class SessionController extends AbstractController {
             $this->addFlash('error', 'Jeton CSRF invalide.');
         }
 
-        return $this->redirectToRoute('session_index');
+        return $this->redirect($this->generateUrl('formation_index') . '#sessions');
     }
 
     // --------------------------------------------------------------------------

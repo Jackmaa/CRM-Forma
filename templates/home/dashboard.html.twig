@@ -14,7 +14,9 @@
     </div>
 
     <div {{ vue_component('Dashboard/RecentActivity')}}></div>
+    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_ADMIN_CENTRE') %}
     <div {{ vue_component('Dashboard/QuickActions') }}></div>
+    {% endif %}
   </main>
 </div>
 {% endblock %}

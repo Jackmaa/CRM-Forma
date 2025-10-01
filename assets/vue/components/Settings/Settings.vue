@@ -156,8 +156,8 @@
  */
 import { reactive, ref, onMounted } from "vue";
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
+import { getJson, putJson } from "@/utils/apiFetch";
 
-const token = localStorage.getItem("auth_token") || "";
 const settings = reactive({
     username: "",
     email: "",
@@ -171,20 +171,27 @@ const saving = ref(false);
 
 // Chargement initial des paramètres utilisateur
 onMounted(async () => {
-    const res = await apiFetch("/user/settings", {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) Object.assign(settings, await res.json());
+    if (typeof window !== "undefined" && window.awaitJwt) {
+        try {
+            await window.awaitJwt;
+        } catch {}
+    }
+    await loadSettings();
 });
 
 /**
  * Réinitialise le formulaire et recharge les données depuis le serveur.
  */
+async function loadSettings() {
+    const data = await getJson("/user/settings");
+    if (data) Object.assign(settings, data);
+}
+
 function resetForm() {
     activeTab.value = "profil";
     settings.password = "";
     // reload from server
-    onMounted();
+    loadSettings();
 }
 
 /**
@@ -199,20 +206,8 @@ async function saveSettings() {
         notifications: settings.notifications,
         theme: settings.theme,
     };
-    const res = await fetch("/api/user/settings", {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-    });
-    if (res.ok) {
-        const updated = await fetch("/api/user/settings", {
-            headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => r.json());
-        Object.assign(settings, updated);
-    }
+    await putJson("/user/settings", payload);
+    await loadSettings();
     saving.value = false;
 }
 </script>

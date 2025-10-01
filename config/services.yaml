@@ -36,6 +36,8 @@ services:
             $defaultValidityDays: "%app.devis_validity_days%"
             $defaultTvaRate: "%app.tva_default_rate%"
 
+    App\Service\ConventionSnapshotBuilder: ~
+
     App\Service\DocumentPdfGenerator:
         arguments:
             $basePath: "%app.docs_base_path%"

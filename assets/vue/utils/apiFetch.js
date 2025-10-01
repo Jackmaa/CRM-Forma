@@ -1,10 +1,6 @@
 export async function apiFetch(pathOrUrl, options = {}) {
-    // Attendre le bootstrap JWT si dispo (évite la course au démarrage)
-    if (
-        typeof window !== "undefined" &&
-        window.awaitJwt &&
-        !localStorage.getItem("jwt_token")
-    ) {
+    // Attendre le bootstrap JWT au premier appel et à chaque navigation côté client
+    if (typeof window !== "undefined" && window.awaitJwt) {
         try {
             await window.awaitJwt;
         } catch {}

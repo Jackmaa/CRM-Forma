@@ -25,4 +25,18 @@ final class DocumentNumberGenerator {
         $seq = str_pad((string) ($count + 1), 5, '0', STR_PAD_LEFT);
         return sprintf('DEV-%s-%s', $year, $seq);
     }
+    public function nextForConvention(): string {
+        $year    = (new \DateTimeImmutable())->format('Y');
+        $pattern = sprintf('CNV-%s-%%', $year);
+
+        $count = (int) $this->em->createQueryBuilder()
+            ->select('COUNT(d.id)')
+            ->from(\App\Entity\Document::class, 'd')
+            ->where('d.type = :t')->setParameter('t', \App\Entity\Document::TYPE_CONVENTION)
+            ->andWhere('d.number LIKE :p')->setParameter('p', $pattern)
+            ->getQuery()->getSingleScalarResult();
+
+        $seq = str_pad((string) ($count + 1), 5, '0', STR_PAD_LEFT);
+        return sprintf('CNV-%s-%s', $year, $seq);
+    }
 }

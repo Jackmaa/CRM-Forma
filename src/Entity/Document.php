@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['type', 'number'], name: 'idx_doc_type_number')]
 class Document {
     public const TYPE_DEVIS       = 'DEVIS';
+    public const TYPE_CONVENTION  = 'CONVENTION';
     public const STATUS_GENERATED = 'GENERATED';
     public const STATUS_SENT      = 'SENT';
     public const STATUS_SIGNED    = 'SIGNED';

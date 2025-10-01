@@ -48,6 +48,13 @@
                     >
                     <button
                         v-if="isAdmin"
+                        @click="generateConventions(s.id)"
+                        class="btn btn-outline btn-sm"
+                    >
+                        Conventions
+                    </button>
+                    <button
+                        v-if="isAdmin"
                         @click="edit(s.id)"
                         class="btn btn-ghost btn-sm"
                     >
@@ -91,6 +98,25 @@ const props = defineProps({
 
 const sessions = ref([]);
 const search = ref("");
+
+const loadingIds = ref(new Set());
+
+async function generateConventions(id) {
+    if (!confirm("Générer & envoyer les conventions pour cette session ?"))
+        return;
+    loadingIds.value.add(id);
+    try {
+        const res = await fetch(`/sessions/${id}/conventions/generate`, {
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Génération lancée.");
+    } catch (e) {
+        alert("Erreur lors du déclenchement.");
+    } finally {
+        loadingIds.value.delete(id);
+    }
+}
 
 /**
  * Charge les sessions depuis l'API.

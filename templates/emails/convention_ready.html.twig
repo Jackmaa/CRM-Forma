@@ -1,0 +1,11 @@
+<p>Bonjour {{ s.stagiaire.fullname }},</p>
+<p>Veuillez trouver ci-joint votre convention <strong>{{ document.number }}</strong>
+pour la session <strong>{{ s.session.title }}</strong> du {{ s.session.date_start|date('d/m/Y H:i') }} au {{ s.session.date_end|date('d/m/Y H:i') }}.</p>
+
+<p style="margin:16px 0;">
+  <a href="{{ downloadUrl }}" style="display:inline-block;padding:10px 16px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+    Ouvrir la convention (PDF)
+  </a>
+</p>
+
+<p>Cordialement,<br>{{ s.of.name }}</p>

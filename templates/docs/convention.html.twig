@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+  body{font-family:Arial,system-ui; font-size:12px; color:#111}
+  h1{font-size:18px;margin:0 0 8px}
+  h2{font-size:14px;margin:12px 0 6px}
+  table{width:100%;border-collapse:collapse}
+  th,td{border:1px solid #ddd;padding:6px;text-align:left}
+  th{background:#f6f6f6}
+  .section{margin-bottom:12px}
+</style>
+</head>
+<body>
+  <h1>Convention de formation {{ document.number }}</h1>
+
+  <div class="section">
+    <strong>{{ s.of.name }}</strong> — SIRET {{ s.of.siret }}<br>
+    {{ s.of.address }}{% if s.of.email %} — {{ s.of.email }}{% endif %}
+  </div>
+
+<div class="section">
+  <h2>Stagiaire</h2>
+  <div>{{ s.stagiaire.fullname|default('Stagiaire') }} — {{ s.stagiaire.email|default('') }}</div>
+  {% if s.stagiaire.address is defined and s.stagiaire.address %}
+    <div>{{ s.stagiaire.address }}</div>
+  {% endif %}
+</div>
+
+
+  <div class="section">
+    <h2>Session</h2>
+    <div>
+      {{ s.session.title }}{% if s.session.code %} ({{ s.session.code }}){% endif %}<br>
+      Du {{ s.session.date_start|date('d/m/Y H:i') }} au {{ s.session.date_end|date('d/m/Y H:i') }}
+      — {{ s.session.hours_total }} h — {{ s.session.modality|default('') }}<br>
+      Lieu : {{ s.session.location|default('—') }}
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Montant</h2>
+    <table>
+      <tr><th>Montant HT</th><td>{{ s.pricing.ht|number_format(2, ',', ' ') }} €</td></tr>
+      <tr><th>TVA ({{ s.pricing.tva_rate|default(0) }}%)</th><td>{{ s.pricing.tva|number_format(2, ',', ' ') }} €</td></tr>
+      <tr><th>Total TTC</th><td><strong>{{ s.pricing.ttc|number_format(2, ',', ' ') }} €</strong></td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>Mentions</h2>
+    <p>{{ s.legal.cancel }}</p>
+    <p>{{ s.legal.rgpd }}</p>
+  </div>
+
+  <div class="section">
+    <h2>Signatures</h2>
+    <p>Fait à {{ s.meta.place }}, le {{ s.meta.issued_at|date('d/m/Y') }}</p>
+    <table style="width:100%; margin-top:20px">
+      <tr>
+        <td style="width:50%; vertical-align:top;">
+          <strong>Pour l’organisme</strong><br><br><br>Signature :
+        </td>
+        <td style="width:50%; vertical-align:top;">
+          <strong>Le stagiaire</strong><br><br><br>Signature :
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>
