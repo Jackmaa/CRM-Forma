@@ -145,15 +145,6 @@ class ResetPasswordController extends AbstractController {
         try {
             $resetToken = $this->resetPasswordHelper->generateResetToken($user);
         } catch (ResetPasswordExceptionInterface $e) {
-            // Si vous souhaitez indiquer à l'utilisateur pourquoi un email de réinitialisation n'a pas été envoyé, décommentez
-            // les lignes ci-dessous et changez la redirection vers 'app_forgot_password_request'.
-            // Attention : cela peut révéler si un utilisateur est enregistré ou non.
-            //
-            // $this->addFlash('reset_password_error', sprintf(
-            //     '%s - %s',
-            //     $translator->trans(ResetPasswordExceptionInterface::MESSAGE_PROBLEM_HANDLE, [], 'ResetPasswordBundle'),
-            //     $translator->trans($e->getReason(), [], 'ResetPasswordBundle')
-            // ));
 
             return $this->redirectToRoute('app_check_email');
         }
